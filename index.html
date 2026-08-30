@@ -369,65 +369,6 @@
     margin-top: 2px;
   }
 
-  /* ---- LIVE ACTIVITY (public feed) ---- */
-  .activity-wrap {
-    background: var(--paper-2);
-    border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
-  }
-
-  .activity-list {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .activity-row {
-    display: flex;
-    align-items: center;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--line);
-    font-size: 13.5px;
-  }
-  .activity-row:last-child { border-bottom: none; }
-
-  .activity-row .badge {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 3px 9px;
-    border-radius: 999px;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    flex: 0 0 auto;
-    margin-right: 14px;
-  }
-
-  .activity-summary {
-    color: var(--ink);
-    flex: 1 1 auto;
-    min-width: 0;
-  }
-
-  .activity-time {
-    color: var(--slate);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    flex: 0 0 auto;
-    margin-left: 14px;
-    white-space: nowrap;
-  }
-
-  .activity-state {
-    padding: 30px 0;
-    color: var(--slate);
-    font-size: 13.5px;
-    font-family: 'IBM Plex Mono', monospace;
-  }
-
-  @media (max-width: 700px) {
-    .activity-time { display: none; }
-  }
-
   /* ---- SECTIONS ---- */
   section { padding: 96px 0; }
 
@@ -743,7 +684,6 @@
     <div class="nav-links">
       <a href="#demo">Talk to Sara</a>
       <a href="#what">What she handles</a>
-      <a href="#activity">Live activity</a>
       <a href="#pricing">Pricing</a>
       <a href="#faq">FAQ</a>
       <a href="#signup" class="btn btn-brass">Get Sara — $29/mo</a>
@@ -755,7 +695,6 @@
   <div id="mobile-menu" class="mobile-menu">
     <a href="#demo">Talk to Sara</a>
     <a href="#what">What she handles</a>
-    <a href="#activity">Live activity</a>
     <a href="#pricing">Pricing</a>
     <a href="#faq">FAQ</a>
     <a href="#signup" class="btn btn-brass" style="margin-top: 8px;">Get Sara — $29/mo</a>
@@ -864,19 +803,6 @@
   </div>
 </section>
 
-<section id="activity" class="activity-wrap">
-  <div class="wrap" style="padding: 96px 0;">
-    <div class="section-head">
-      <span class="kicker">Not a mockup</span>
-      <h2 class="display">This is Sara's real activity feed</h2>
-      <p>Live, pulled straight from her system right now. Names are shortened and numbers are hidden — but this is genuinely happening.</p>
-    </div>
-    <div id="live-activity-list" class="activity-list">
-      <div class="activity-state">Loading live activity…</div>
-    </div>
-  </div>
-</section>
-
 <section id="pricing" class="pricing-wrap">
   <div class="wrap">
     <div class="section-head" style="margin: 0 auto 56px; text-align: center;">
@@ -950,7 +876,6 @@
       <span class="footer-copy">© 2026 Sara. All rights reserved.</span>
       <div class="footer-links">
         <a href="#demo">Talk to Sara</a>
-        <a href="#activity">Live activity</a>
         <a href="#pricing">Pricing</a>
         <a href="#faq">FAQ</a>
         <a href="#signup">Get Sara</a>
@@ -1014,80 +939,6 @@
 })();
 </script>
 
-<script>
-(function () {
-  var WEBHOOK_URL = 'https://muazajmal212.app.n8n.cloud/webhook/transcripts';
-  var TYPE_META = {
-    appointment: { label: 'Booked', cls: 'tag-appt' },
-    ticket:      { label: 'Ticket', cls: 'tag-ticket' },
-    transfer:    { label: 'Transfer', cls: 'tag-xfer' },
-    callback:    { label: 'Callback', cls: 'tag-cb' }
-  };
-
-  function escapeHtml(str) {
-    var div = document.createElement('div');
-    div.textContent = str == null ? '' : String(str);
-    return div.innerHTML;
-  }
-
-  function firstName(name) {
-    if (!name || name === 'Unknown') return 'A caller';
-    return escapeHtml(String(name).trim().split(/\s+/)[0]);
-  }
-
-  function relativeTime(dateStr) {
-    if (!dateStr) return '';
-    var d = new Date(dateStr);
-    if (isNaN(d.getTime())) return '';
-    var diffMs = Date.now() - d.getTime();
-    var mins = Math.round(diffMs / 60000);
-    if (mins < 1) return 'just now';
-    if (mins < 60) return mins + 'm ago';
-    var hours = Math.round(mins / 60);
-    if (hours < 24) return hours + 'h ago';
-    var days = Math.round(hours / 24);
-    return days + 'd ago';
-  }
-
-  function renderActivity(items) {
-    var container = document.getElementById('live-activity-list');
-    if (!items || items.length === 0) {
-      container.innerHTML = '<div class="activity-state">No activity yet — be the first call.</div>';
-      return;
-    }
-
-    var rows = items.slice(0, 8).map(function (item) {
-      var meta = TYPE_META[item.type] || { label: 'Activity', cls: 'tag-cb' };
-      var who = firstName(item.customer_name);
-      var summary = escapeHtml(item.summary || '');
-      var time = relativeTime(item.date);
-      return (
-        '<div class="activity-row">' +
-          '<span class="badge ' + meta.cls + '">' + meta.label + '</span>' +
-          '<span class="activity-summary">' + who + ' — ' + summary + '</span>' +
-          '<span class="activity-time">' + escapeHtml(time) + '</span>' +
-        '</div>'
-      );
-    });
-
-    container.innerHTML = rows.join('');
-  }
-
-  fetch(WEBHOOK_URL)
-    .then(function (res) {
-      if (!res.ok) throw new Error('bad response');
-      return res.json();
-    })
-    .then(function (data) {
-      var items = Array.isArray(data) ? data : (data.activity || []);
-      renderActivity(items);
-    })
-    .catch(function () {
-      var container = document.getElementById('live-activity-list');
-      container.innerHTML = '<div class="activity-state">Live feed is warming up — check back in a moment.</div>';
-    });
-})();
-</script>
 
 </body>
 </html>
