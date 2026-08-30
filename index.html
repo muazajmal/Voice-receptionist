@@ -1,689 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Social Craft Agency | AI-Powered Growth Agency</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        :root {
-            --bg-dark: #0a0b10;
-            --bg-card: #12141d;
-            --bg-card-hover: #1a1d2b;
-            --accent-blue: #3b82f6;
-            --accent-cyan: #06b6d4;
-            --accent-purple: #8b5cf6;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border-color: #1e293b;
-            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            --gradient-glow: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        /* Utility Components */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 12px 28px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            border-radius: 50px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: var(--gradient-primary);
-            color: #ffffff;
-            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
-            border: none;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 24px rgba(59, 130, 246, 0.6);
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-outline:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: var(--text-muted);
-        }
-
-        .section-header {
-            text-align: center;
-            max-width: 700px;
-            margin: 0 auto 60px auto;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 6px 16px;
-            background: var(--gradient-glow);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 50px;
-            color: var(--accent-cyan);
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 16px;
-        }
-
-        .section-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 16px;
-            line-height: 1.2;
-        }
-
-        .section-subtitle {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-        }
-
-        /* Top Bar */
-        .top-bar {
-            background: #050608;
-            border-bottom: 1px solid var(--border-color);
-            padding: 10px 0;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .top-bar .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .top-bar-info span {
-            margin-right: 20px;
-        }
-
-        .top-bar-info i {
-            color: var(--accent-cyan);
-            margin-right: 6px;
-        }
-
-        .top-bar-socials a {
-            color: var(--text-muted);
-            margin-left: 12px;
-            transition: color 0.3s;
-        }
-
-        .top-bar-socials a:hover {
-            color: var(--text-main);
-        }
-
-        /* Navigation */
-        nav {
-            position: sticky;
-            top: 0;
-            background: rgba(10, 11, 16, 0.85);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border-color);
-            z-index: 1000;
-            padding: 20px 0;
-        }
-
-        nav .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--text-main);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo span {
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: var(--text-main);
-        }
-
-        /* Hero Section */
-        .hero {
-            padding: 100px 0 80px 0;
-            position: relative;
-        }
-
-        .hero-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: center;
-        }
-
-        .hero-content h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 24px;
-        }
-
-        .hero-content h1 span {
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero-content p {
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            margin-bottom: 36px;
-        }
-
-        .hero-cta {
-            display: flex;
-            gap: 16px;
-        }
-
-        .hero-visual {
-            position: relative;
-        }
-
-        .hero-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 30px;
-            position: relative;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-        }
-
-        .hero-card-header {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--gradient-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: white;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            background: #22c55e;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 6px;
-        }
-
-        /* Services Grid */
-        .services {
-            padding: 100px 0;
-            background: #0d0e15;
-        }
-
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 24px;
-        }
-
-        .service-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 32px;
-            transition: all 0.3s ease;
-        }
-
-        .service-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(59, 130, 246, 0.4);
-            background: var(--bg-card-hover);
-        }
-
-        .service-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            background: var(--gradient-glow);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: var(--accent-cyan);
-            margin-bottom: 24px;
-        }
-
-        .service-card h3 {
-            font-size: 1.3rem;
-            margin-bottom: 12px;
-        }
-
-        .service-card p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            margin-bottom: 20px;
-        }
-
-        /* Pricing Section */
-        .pricing {
-            padding: 100px 0;
-        }
-
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-
-        .pricing-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 40px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .pricing-card.popular {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.15);
-        }
-
-        .popular-badge {
-            position: absolute;
-            top: -15px;
-            right: 30px;
-            background: var(--gradient-primary);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .price {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin: 20px 0 10px 0;
-        }
-
-        .price span {
-            font-size: 1rem;
-            color: var(--text-muted);
-            font-weight: 400;
-        }
-
-        .features-list {
-            list-style: none;
-            margin: 30px 0;
-            flex-grow: 1;
-        }
-
-        .features-list li {
-            margin-bottom: 14px;
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .features-list li i {
-            color: #22c55e;
-        }
-
-        /* Footer */
-        footer {
-            background: #050608;
-            border-top: 1px solid var(--border-color);
-            padding: 80px 0 40px 0;
-        }
-
-        .footer-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 60px;
-        }
-
-        .footer-brand p {
-            color: var(--text-muted);
-            margin-top: 16px;
-            max-width: 300px;
-        }
-
-        .footer-col h4 {
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-        }
-
-        .footer-links {
-            list-style: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 12px;
-        }
-
-        .footer-links a {
-            color: var(--text-muted);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .footer-links a:hover {
-            color: var(--text-main);
-        }
-
-        .footer-bottom {
-            text-align: center;
-            padding-top: 40px;
-            border-top: 1px solid var(--border-color);
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        /* Responsive */
-        @media (max-width: 992px) {
-            .hero-grid {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-            .hero-cta {
-                justify-content: center;
-            }
-            .nav-links {
-                display: none;
-            }
-            .footer-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <!-- Top Contact Bar -->
-    <div class="top-bar">
-        <div class="container">
-            <div class="top-bar-info">
-                <span><i class="fa-solid fa-phone"></i> +1 (628) 272-4262</span>
-                <span><i class="fa-solid fa-envelope"></i> hello@socialcraftagency.com</span>
-            </div>
-            <div class="top-bar-socials">
-                <a href="#"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
-                <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="#"><i class="fa-brands fa-tiktok"></i></a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Navbar -->
-    <nav>
-        <div class="container">
-            <a href="#" class="logo">
-                <i class="fa-solid fa-bolt" style="color: var(--accent-cyan);"></i>
-                SOCIAL CRAFT <span>AGENCY</span>
-            </a>
-            <ul class="nav-links">
-                <li><a href="#about">About Us</a></li>
-                <li><a href="#services">Services</a></li>
-                <li><a href="#pricing">Pricing</a></li>
-                <li><a href="#contact">Contact Us</a></li>
-            </ul>
-            <a href="#audit" class="btn btn-primary">Get Free Audit</a>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <div class="hero-grid">
-                <div class="hero-content">
-                    <span class="badge">AI-Powered Growth Agency</span>
-                    <h1>Never Miss Another <span>Lead Again</span></h1>
-                    <p>We build custom AI systems, manage meta-targeted ad campaigns, and automate front-desk operations to scale US small businesses on autopilot.</p>
-                    <div class="hero-cta">
-                        <a href="#pricing" class="btn btn-primary">View Packages</a>
-                        <a href="#services" class="btn btn-outline">Explore Maya AI</a>
-                    </div>
-                </div>
-                <div class="hero-visual">
-                    <div class="hero-card">
-                        <div class="hero-card-header">
-                            <div class="avatar">M</div>
-                            <div>
-                                <h4 style="margin: 0;">Maya AI Agent</h4>
-                                <span style="font-size: 0.85rem; color: var(--text-muted);">
-                                    <span class="status-dot"></span>Active 24/7 Front Desk
-                                </span>
-                            </div>
-                        </div>
-                        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 16px;">
-                            "Hello! I just qualified a new prospect from your Instagram DM and booked them into your Google Calendar for tomorrow at 2:00 PM."
-                        </p>
-                        <div style="background: rgba(59, 130, 246, 0.1); border: 1px dashed var(--accent-blue); padding: 12px; border-radius: 8px; font-size: 0.85rem; text-align: center; color: var(--accent-cyan);">
-                            <i class="fa-solid fa-circle-check"></i> 0 Missed Calls • 100% Instant Response Rate
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Services Section -->
-    <section class="services" id="services">
-        <div class="container">
-            <div class="section-header">
-                <span class="badge">Next-Gen Systems</span>
-                <h2 class="section-title">Our Growth Services</h2>
-                <p class="section-subtitle">Combining automated AI infrastructure with high-converting digital marketing strategies.</p>
-            </div>
-            <div class="services-grid">
-                <!-- Service 1 -->
-                <div class="service-card">
-                    <div class="service-icon"><i class="fa-solid fa-robot"></i></div>
-                    <h3>Maya AI — 24/7 Front Desk</h3>
-                    <p>Instant call handling, WhatsApp, IG DMs, and website chat replies. Qualifies leads and books appointments directly to your calendar.</p>
-                    <a href="#" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600; font-size: 0.9rem;">Free Demo &rarr;</a>
-                </div>
-                <!-- Service 2 -->
-                <div class="service-card">
-                    <div class="service-icon"><i class="fa-solid fa-rectangle-ad"></i></div>
-                    <h3>AI-Powered Ads</h3>
-                    <p>Targeted Meta & Google ad campaigns engineered with dynamic AI creative testing to minimize cost per lead and maximize ROAS.</p>
-                    <a href="#" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600; font-size: 0.9rem;">Free Demo &rarr;</a>
-                </div>
-                <!-- Service 3 -->
-                <div class="service-card">
-                    <div class="service-icon"><i class="fa-solid fa-hashtag"></i></div>
-                    <h3>Social Media Growth</h3>
-                    <p>Automated visual asset creation, scheduling, reel editing, and automated review collection for Google Business Profile.</p>
-                    <a href="#" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600; font-size: 0.9rem;">Free Demo &rarr;</a>
-                </div>
-                <!-- Service 4 -->
-                <div class="service-card">
-                    <div class="service-icon"><i class="fa-solid fa-code"></i></div>
-                    <h3>Website Development</h3>
-                    <p>Custom-built, ultra-fast, mobile-optimized websites designed for maximum conversions and live in just 7 days.</p>
-                    <a href="#" style="color: var(--accent-cyan); text-decoration: none; font-weight: 600; font-size: 0.9rem;">Free Demo &rarr;</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Pricing Section -->
-    <section class="pricing" id="pricing">
-        <div class="container">
-            <div class="section-header">
-                <span class="badge">Transparent Pricing</span>
-                <h2 class="section-title">Flexible Growth Packages</h2>
-                <p class="section-subtitle">Scalable infrastructure tailored to match your business stage.</p>
-            </div>
-            <div class="pricing-grid">
-                <!-- Package 1 -->
-                <div class="pricing-card">
-                    <h3>Maya Starter</h3>
-                    <p style="color: var(--text-muted); font-size: 0.9rem;">Text Automation Essentials</p>
-                    <div class="price">$999 <span>setup</span></div>
-                    <p style="color: var(--accent-cyan); font-weight: 600;">+ $199 / month</p>
-                    <ul class="features-list">
-                        <li><i class="fa-solid fa-check"></i> Website Chat AI Bot</li>
-                        <li><i class="fa-solid fa-check"></i> 24/7 WhatsApp AI Bot</li>
-                        <li><i class="fa-solid fa-check"></i> Instagram DM Automation</li>
-                        <li><i class="fa-solid fa-check"></i> Automated Qualification</li>
-                        <li><i class="fa-solid fa-check"></i> Live in 7 Days</li>
-                    </ul>
-                    <a href="#" class="btn btn-outline">Get Started</a>
-                </div>
-
-                <!-- Package 2 -->
-                <div class="pricing-card popular">
-                    <span class="popular-badge">Most Popular</span>
-                    <h3>Maya Pro</h3>
-                    <p style="color: var(--text-muted); font-size: 0.9rem;">Voice & Multichannel Automation</p>
-                    <div class="price">$1,499 <span>setup</span></div>
-                    <p style="color: var(--accent-cyan); font-weight: 600;">+ $299 / month</p>
-                    <ul class="features-list">
-                        <li><i class="fa-solid fa-check"></i> Everything in Starter</li>
-                        <li><i class="fa-solid fa-check"></i> AI Phone Answering (24/7)</li>
-                        <li><i class="fa-solid fa-check"></i> Up to 4 Simultaneous Calls</li>
-                        <li><i class="fa-solid fa-check"></i> Phone Reservation Booking</li>
-                        <li><i class="fa-solid fa-check"></i> Full Call Recordings & Transcripts</li>
-                    </ul>
-                    <a href="#" class="btn btn-primary">Get Started</a>
-                </div>
-
-                <!-- Package 3 -->
-                <div class="pricing-card">
-                    <h3>Full Growth System</h3>
-                    <p style="color: var(--text-muted); font-size: 0.9rem;">Complete Omnichannel Package</p>
-                    <div class="price">$2,999 <span>/ month</span></div>
-                    <p style="color: var(--text-muted); font-size: 0.85rem;">+ Client Ad Spend</p>
-                    <ul class="features-list">
-                        <li><i class="fa-solid fa-check"></i> Everything in Maya Elite</li>
-                        <li><i class="fa-solid fa-check"></i> Full Social Media Mgmt</li>
-                        <li><i class="fa-solid fa-check"></i> Meta & Google Ads Setup</li>
-                        <li><i class="fa-solid fa-check"></i> Bi-Weekly Strategy Calls</li>
-                        <li><i class="fa-solid fa-check"></i> Priority 2-Hour Support</li>
-                    </ul>
-                    <a href="#" class="btn btn-outline">Get Started</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-brand">
-                    <a href="#" class="logo">
-                        <i class="fa-solid fa-bolt" style="color: var(--accent-cyan);"></i>
-                        SOCIAL CRAFT
-                    </a>
-                    <p>AI-powered growth systems designed to capture, qualify, and convert leads around the clock for US small businesses.</p>
-                </div>
-                <div class="footer-col">
-                    <h4>Navigation</h4>
-                    <ul class="footer-links">
-                        <li><a href="#about">About Us</a></li>
-                        <li><a href="#services">Services</a></li>
-                        <li><a href="#pricing">Pricing</a></li>
-                        <li><a href="#contact">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Services</h4>
-                    <ul class="footer-links">
-                        <li><a href="#">Maya Voice AI</a></li>
-                        <li><a href="#">Meta/Google Ads</a></li>
-                        <li><a href="#">Social Growth</a></li>
-                        <li><a href="#">Web Development</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Contact</h4>
-                    <ul class="footer-links">
-                        <li><a href="#">hello@socialcraftagency.com</a></li>
-                        <li><a href="#">+1 (628) 272-4262</a></li>
-                        <li><a href="#">United States</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 Social Craft Agency LLC. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-</body>
-</html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sara — The AI Receptionist That Never Misses a Call</title>
+<meta name="description" content="Sara answers every call, books every appointment, and logs every request — 24/7. $29/month.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+  :root {
+    --ink: #0d111e;
+    --ink-2: #161b2e;
+    --paper: #f3f5f8;
+    --paper-2: #ffffff;
+    --brass: #c99a4b;
+    --brass-bright: #e5b96d;
+    --brass-glow: rgba(201, 154, 75, 0.15);
+    --teal: #3fa796;
+    --slate: #8a93a6;
+    --slate-dark: #4b5468;
+    --line: rgba(138, 147, 166, 0.18);
+    --radius-lg: 16px;
+    --radius-md: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  .display {
+    font-family: 'Fraunces', serif;
+    font-optical-sizing: auto;
+  }
+
+  .mono {
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .wrap {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---- NAVIGATION ---- */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13, 17, 30, 0.90);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .nav-inner {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--paper-2);
+  }
+
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--brass), var(--brass-bright));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--ink);
+    box-shadow: 0 4px 12px rgba(201, 154, 75, 0.3);
+  }
+
+  .brand-name {
+    font-family: 'Fraunces',
+        
