@@ -824,6 +824,45 @@
   .chat-send:hover { background: var(--brass-bright); }
   .chat-send:disabled { opacity: 0.5; cursor: default; }
 
+  .chat-mic {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    border-radius: 8px;
+    width: 38px;
+    margin-right: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .chat-mic:hover { border-color: var(--brass); }
+  .chat-mic.listening {
+    background: #fee2e2;
+    border-color: #dc2626;
+    animation: micPulse 1.2s infinite ease-in-out;
+  }
+  .chat-mic.speaking {
+    background: rgba(63,167,150,0.15);
+    border-color: var(--teal);
+  }
+  .chat-mic.unsupported {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  @keyframes micPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.35); }
+    50% { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
+  }
+
+  .chat-voice-note {
+    font-size: 11px;
+    color: var(--slate);
+    text-align: center;
+    padding: 4px 10px 0;
+    background: var(--paper-2);
+  }
+
   @media (max-width: 520px) {
     .chat-panel {
       right: 12px;
@@ -1141,9 +1180,11 @@
     </div>
   </div>
   <form id="chat-form" class="chat-input-row">
+    <button type="button" id="chat-mic" class="chat-mic" aria-label="Talk with AI — hold to speak" title="Talk with AI">🎤</button>
     <input id="chat-input" type="text" placeholder="Type a message…" autocomplete="off" aria-label="Message Sara">
     <button type="submit" class="chat-send" aria-label="Send">➤</button>
   </form>
+  <div id="chat-voice-note" class="chat-voice-note" style="display:none;"></div>
 </div>
 
 <script>
@@ -1157,8 +1198,100 @@
   var form = document.getElementById('chat-form');
   var input = document.getElementById('chat-input');
   var sendBtn = form.querySelector('.chat-send');
+  var micBtn = document.getElementById('chat-mic');
+  var voiceNote = document.getElementById('chat-voice-note');
   var navLink = document.getElementById('nav-chat-link');
   var navLinkMobile = document.getElementById('nav-chat-link-mobile');
+
+  var wasVoiceInput = false;
+  var isListening = false;
+  var recognition = null;
+
+  var SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var synth = window.speechSynthesis;
+  var voiceInputSupported = !!SpeechRecognitionCtor;
+  var voiceOutputSupported = !!synth;
+
+  function showVoiceNote(text) {
+    voiceNote.textContent = text;
+    voiceNote.style.display = text ? 'block' : 'none';
+  }
+
+  if (!voiceInputSupported) {
+    micBtn.classList.add('unsupported');
+    micBtn.setAttribute('aria-disabled', 'true');
+    micBtn.title = 'Voice input isn\'t supported in this browser — try Chrome or Edge';
+  } else {
+    recognition = new SpeechRecognitionCtor();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = function () {
+      isListening = true;
+      micBtn.classList.add('listening');
+      showVoiceNote('Listening…');
+    };
+
+    recognition.onresult = function (event) {
+      var transcript = event.results[0][0].transcript;
+      input.value = transcript;
+      wasVoiceInput = true;
+      showVoiceNote('');
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    };
+
+    recognition.onerror = function (event) {
+      showVoiceNote(
+        event.error === 'not-allowed'
+          ? 'Microphone access was blocked — check your browser permissions.'
+          : "Couldn't hear that — try again."
+      );
+    };
+
+    recognition.onend = function () {
+      isListening = false;
+      micBtn.classList.remove('listening');
+      setTimeout(function () { showVoiceNote(''); }, 2500);
+    };
+  }
+
+  function stopSpeaking() {
+    if (voiceOutputSupported && synth.speaking) synth.cancel();
+    micBtn.classList.remove('speaking');
+  }
+
+  function speak(text) {
+    if (!voiceOutputSupported) return;
+    synth.cancel();
+    var utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 1;
+    utter.pitch = 1;
+    utter.onstart = function () { micBtn.classList.add('speaking'); };
+    utter.onend = function () { micBtn.classList.remove('speaking'); };
+    utter.onerror = function () { micBtn.classList.remove('speaking'); };
+    synth.speak(utter);
+  }
+
+  micBtn.addEventListener('click', function () {
+    if (!voiceInputSupported) {
+      showVoiceNote('Voice input isn\'t supported in this browser — try Chrome or Edge.');
+      return;
+    }
+    if (micBtn.classList.contains('speaking')) {
+      stopSpeaking();
+      return;
+    }
+    if (isListening) {
+      recognition.stop();
+      return;
+    }
+    try {
+      recognition.start();
+    } catch (e) {
+      // Recognition may already be starting; ignore duplicate start errors
+    }
+  });
 
   function escapeHtml(str) {
     var div = document.createElement('div');
@@ -1177,6 +1310,8 @@
     panel.classList.remove('open');
     panel.setAttribute('aria-hidden', 'true');
     launcher.classList.remove('hide');
+    stopSpeaking();
+    if (isListening && recognition) recognition.stop();
   }
 
   launcher.addEventListener('click', openChat);
@@ -1227,6 +1362,9 @@
     var text = input.value.trim();
     if (!text) return;
 
+    var usedVoice = wasVoiceInput;
+    wasVoiceInput = false;
+
     addBubble(text, 'user');
     input.value = '';
     sendBtn.disabled = true;
@@ -1243,11 +1381,15 @@
       })
       .then(function (data) {
         hideTyping();
-        addBubble(data.reply || "Sorry, I didn't quite get that.", 'bot');
+        var reply = data.reply || "Sorry, I didn't quite get that.";
+        addBubble(reply, 'bot');
+        if (usedVoice) speak(reply);
       })
       .catch(function () {
         hideTyping();
-        addBubble("I'm having trouble connecting right now — try calling the live demo at +1 (629) 205-4731, or the form below.", 'bot');
+        var fallback = "I'm having trouble connecting right now — try calling the live demo at +1 (629) 205-4731, or the form below.";
+        addBubble(fallback, 'bot');
+        if (usedVoice) speak(fallback);
       })
       .finally(function () {
         sendBtn.disabled = false;
