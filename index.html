@@ -513,10 +513,30 @@
 
   .price-card .btn { width: 100%; padding: 14px; font-size: 15px; }
 
+  .trust-badges {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 18px;
+  }
+  .trust-badges span {
+    font-size: 11.5px;
+    color: var(--slate);
+    font-family: 'IBM Plex Mono', monospace;
+    margin: 4px 10px;
+  }
+
   /* ---- SIGNUP ---- */
   .signup-wrap {
     background: var(--paper);
   }
+
+  .contact-wrap {
+    background: var(--ink-2);
+    padding: 90px 0;
+  }
+  .contact-wrap .kicker { color: var(--brass-bright); }
+  .contact-wrap h2 { color: var(--paper-2); }
 
   .signup-frame {
     background: var(--paper-2);
@@ -564,8 +584,8 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 20px;
   }
+  .footer-inner > * { margin: 6px 0; }
 
   .footer-links {
     display: flex;
@@ -656,6 +676,22 @@
   :focus-visible {
     outline: 2px solid var(--brass-bright);
     outline-offset: 2px;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    background: var(--brass);
+    color: var(--ink);
+    padding: 12px 20px;
+    border-radius: 0 0 8px 0;
+    font-weight: 600;
+    font-size: 14px;
+    z-index: 200;
+  }
+  .skip-link:focus {
+    left: 0;
   }
 
   /* ---- CHAT WIDGET ---- */
@@ -887,8 +923,69 @@
     .reveal { opacity: 1; transform: none; transition: none; }
   }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Sara",
+  "description": "Sara answers business phone calls, books appointments, logs support tickets, handles call transfers, and records callback requests — 24/7.",
+  "offers": {
+    "@type": "Offer",
+    "price": "29",
+    "priceCurrency": "USD",
+    "priceSpecification": {
+      "@type": "UnitPriceSpecification",
+      "price": "29",
+      "priceCurrency": "USD",
+      "billingDuration": "P1M"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What does Sara actually connect to?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sara runs on your own automation workflow and writes every appointment, ticket, transfer, and callback to your activity dashboard in real time."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I see the activity feed anywhere else?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes — the web dashboard and the Chrome extension both show the same live feed, so you can check in from your desk or your browser toolbar."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is there a setup fee?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. $29/month covers everything on the Starter plan — no separate onboarding charge."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I cancel anytime?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, it's a month-to-month subscription with no minimum commitment."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
+
+<a href="#main-content" class="skip-link">Skip to content</a>
 
 <nav>
   <div class="nav-inner">
@@ -918,6 +1015,7 @@
   </div>
 </nav>
 
+<main id="main-content">
 <header class="hero">
   <div class="wrap hero-grid">
     <div>
@@ -1039,6 +1137,11 @@
         <li><span class="check">✓</span> Chrome extension for at-a-glance activity</li>
       </ul>
       <a href="#signup" class="btn btn-brass">Get Sara now</a>
+      <div class="trust-badges">
+        <span>No setup fee</span>
+        <span>Cancel anytime</span>
+        <span>Live in minutes</span>
+      </div>
     </div>
   </div>
 </section>
@@ -1087,12 +1190,34 @@
   </div>
 </section>
 
+<section id="contact" class="contact-wrap">
+  <div class="wrap">
+    <div class="section-head" style="margin: 0 auto 40px; text-align: center;">
+      <span class="kicker" style="text-align:center;">Not ready yet?</span>
+      <h2 class="display">Ask a quick question</h2>
+      <p style="color: var(--slate-dark);">No commitment — just tell us what you're wondering about.</p>
+    </div>
+    <div class="signup-frame" style="max-width: 560px; margin: 0 auto;">
+      <iframe
+        class="jotform"
+        style="height: 480px;"
+        src="https://form.jotform.com/262473414277056"
+        title="Quick Question - Contact Sara"
+        loading="lazy">
+      </iframe>
+    </div>
+  </div>
+</section>
+</main>
+
 <footer>
   <div class="wrap">
     <div class="footer-inner" style="margin-bottom: 18px;">
       <span class="footer-copy">© 2026 Sara. All rights reserved.</span>
       <div class="footer-links">
         <a href="#demo">Talk to Sara</a>
+        <a href="#" id="footer-chat-link">Chat with Sara</a>
+        <a href="#contact">Quick question</a>
         <a href="#pricing">Pricing</a>
         <a href="#faq">FAQ</a>
         <a href="#signup">Get Sara</a>
@@ -1104,6 +1229,11 @@
         &nbsp;·&nbsp;
         <a href="tel:+16292054731">+1 (629) 205-4731</a>
         &nbsp;— live 24/7
+      </span>
+      <span class="footer-copy">
+        <a href="privacy.html">Privacy Policy</a>
+        &nbsp;·&nbsp;
+        <a href="terms.html">Terms of Service</a>
       </span>
     </div>
   </div>
@@ -1261,12 +1391,55 @@
     micBtn.classList.remove('speaking');
   }
 
+  var FEMALE_VOICE_HINTS = [
+    'female', 'zira', 'hazel', 'susan', 'samantha', 'victoria', 'karen', 'moira',
+    'tessa', 'fiona', 'linda', 'heather', 'catherine', 'zoe', 'emma', 'ava',
+    'allison', 'serena', 'kate', 'salli', 'joanna', 'ivy', 'kimberly', 'amy',
+    'olivia', 'aria', 'jenny', 'michelle', 'aria', 'zira', 'eva', 'sonia'
+  ];
+
+  var cachedFemaleVoice = null;
+  var voicesReady = false;
+
+  function pickFemaleVoice() {
+    if (!voiceOutputSupported) return null;
+    var voices = synth.getVoices();
+    if (!voices || voices.length === 0) return null;
+
+    for (var i = 0; i < voices.length; i++) {
+      var name = (voices[i].name || '').toLowerCase();
+      for (var j = 0; j < FEMALE_VOICE_HINTS.length; j++) {
+        if (name.indexOf(FEMALE_VOICE_HINTS[j]) !== -1) return voices[i];
+      }
+    }
+
+    // No clear female match — prefer an English voice over a random default
+    for (var k = 0; k < voices.length; k++) {
+      if (voices[k].lang && voices[k].lang.toLowerCase().indexOf('en') === 0) return voices[k];
+    }
+    return voices[0];
+  }
+
+  function refreshVoiceCache() {
+    cachedFemaleVoice = pickFemaleVoice();
+    voicesReady = true;
+  }
+
+  if (voiceOutputSupported) {
+    refreshVoiceCache();
+    if (typeof synth.onvoiceschanged !== 'undefined') {
+      synth.onvoiceschanged = refreshVoiceCache;
+    }
+  }
+
   function speak(text) {
     if (!voiceOutputSupported) return;
     synth.cancel();
     var utter = new SpeechSynthesisUtterance(text);
     utter.rate = 1;
     utter.pitch = 1;
+    var voice = voicesReady ? cachedFemaleVoice : pickFemaleVoice();
+    if (voice) utter.voice = voice;
     utter.onstart = function () { micBtn.classList.add('speaking'); };
     utter.onend = function () { micBtn.classList.remove('speaking'); };
     utter.onerror = function () { micBtn.classList.remove('speaking'); };
@@ -1332,6 +1505,10 @@
       if (toggle) toggle.setAttribute('aria-expanded', 'false');
       openChat();
     });
+  }
+  var footerChatLink = document.getElementById('footer-chat-link');
+  if (footerChatLink) {
+    footerChatLink.addEventListener('click', function (e) { e.preventDefault(); openChat(); });
   }
 
   function addBubble(text, who) {
