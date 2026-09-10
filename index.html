@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sara — The AI Receptionist That Never Misses a Call</title>
-<meta name="description" content="Sara answers every call, books every appointment, and logs every request — 24/7. $29/month.">
+<meta name="description" content="Sara answers every call, books every appointment, and logs every request — 24/7. $199/month.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c99a4b'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='19' font-weight='700' fill='%2312172b' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
 <meta property="og:title" content="Sara — The AI Receptionist That Never Misses a Call">
-<meta property="og:description" content="Sara answers every call, books every appointment, and logs every request — 24/7. $29/month.">
+<meta property="og:description" content="Sara answers every call, books every appointment, and logs every request — 24/7. $199/month.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -725,6 +725,36 @@
   }
   .chat-launcher.hide { display: none; }
 
+  .voice-launcher {
+    position: fixed;
+    right: 96px;
+    bottom: 24px;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: var(--ink);
+    border: 2px solid var(--brass);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    z-index: 80;
+    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  }
+  .voice-launcher:hover { transform: translateY(-2px); border-color: var(--brass-bright); }
+  .voice-launcher-icon { font-size: 22px; }
+  .voice-launcher.unsupported { opacity: 0.35; cursor: not-allowed; }
+  .voice-launcher.listening {
+    border-color: #dc2626;
+    animation: micPulse 1.2s infinite ease-in-out;
+  }
+  .voice-launcher.speaking {
+    border-color: var(--teal);
+    background: rgba(63,167,150,0.15);
+  }
+  .voice-launcher.hide { display: none; }
+
   .chat-panel {
     position: fixed;
     right: 24px;
@@ -860,32 +890,6 @@
   .chat-send:hover { background: var(--brass-bright); }
   .chat-send:disabled { opacity: 0.5; cursor: default; }
 
-  .chat-mic {
-    background: var(--paper);
-    border: 1px solid var(--line);
-    color: var(--ink);
-    border-radius: 8px;
-    width: 38px;
-    margin-right: 8px;
-    font-size: 15px;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: background 0.15s ease, border-color 0.15s ease;
-  }
-  .chat-mic:hover { border-color: var(--brass); }
-  .chat-mic.listening {
-    background: #fee2e2;
-    border-color: #dc2626;
-    animation: micPulse 1.2s infinite ease-in-out;
-  }
-  .chat-mic.speaking {
-    background: rgba(63,167,150,0.15);
-    border-color: var(--teal);
-  }
-  .chat-mic.unsupported {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
   @keyframes micPulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.35); }
     50% { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
@@ -907,6 +911,7 @@
       bottom: 86px;
     }
     .chat-launcher { right: 16px; bottom: 16px; }
+    .voice-launcher { right: 82px; bottom: 16px; width: 52px; height: 52px; }
   }
 
   /* ---- SCROLL REVEAL ---- */
@@ -968,7 +973,7 @@
       "name": "Is there a setup fee?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No. $29/month covers everything on the Starter plan — no separate onboarding charge."
+        "text": "No. $199/month covers everything on the Starter plan — no separate onboarding charge."
       }
     },
     {
@@ -999,7 +1004,7 @@
       <a href="#what">What she handles</a>
       <a href="#pricing">Pricing</a>
       <a href="#faq">FAQ</a>
-      <a href="#signup" class="btn btn-brass">Get Sara — $29/mo</a>
+      <a href="#signup" class="btn btn-brass">Get Sara — $199/mo</a>
     </div>
     <button id="menu-toggle" class="menu-toggle" aria-label="Open menu" aria-expanded="false">
       <span></span><span></span><span></span>
@@ -1011,7 +1016,7 @@
     <a href="#what">What she handles</a>
     <a href="#pricing">Pricing</a>
     <a href="#faq">FAQ</a>
-    <a href="#signup" class="btn btn-brass" style="margin-top: 8px;">Get Sara — $29/mo</a>
+    <a href="#signup" class="btn btn-brass" style="margin-top: 8px;">Get Sara — $199/mo</a>
   </div>
 </nav>
 
@@ -1023,7 +1028,7 @@
       <h1 class="display">The phone rings.<br>Sara <em>picks up</em>.</h1>
       <p class="lede">Sara answers every call, books the appointment, opens the ticket, or takes the message — logged and ready before you've even seen the notification.</p>
       <div class="hero-ctas">
-        <a href="#signup" class="btn btn-brass">Get Sara — $29/mo</a>
+        <a href="#signup" class="btn btn-brass">Get Sara — $199/mo</a>
         <a href="#what" class="btn btn-ghost">See what she logs</a>
       </div>
       <p class="hero-note">No setup fee. Cancel anytime. Live in minutes once your line is connected.</p>
@@ -1128,7 +1133,7 @@
 
     <div class="price-card">
       <div class="price-plan">Sara Starter</div>
-      <div class="price-amount">$29<span>/month</span></div>
+      <div class="price-amount">$199<span>/month</span></div>
       <ul class="price-list">
         <li><span class="check">✓</span> Answers calls 24/7</li>
         <li><span class="check">✓</span> Books appointments directly to your calendar</li>
@@ -1181,7 +1186,7 @@
     </div>
     <div class="faq-item">
       <h3 class="display">Is there a setup fee?</h3>
-      <p>No. $29/month covers everything on the Starter plan — no separate onboarding charge.</p>
+      <p>No. $199/month covers everything on the Starter plan — no separate onboarding charge.</p>
     </div>
     <div class="faq-item">
       <h3 class="display">Can I cancel anytime?</h3>
@@ -1287,6 +1292,11 @@
 </script>
 
 
+<!-- Talk with Sara - standalone floating voice button -->
+<div id="voice-launcher" class="voice-launcher" role="button" tabindex="0" aria-label="Talk with Sara">
+  <span class="voice-launcher-icon">🎤</span>
+</div>
+
 <!-- Chat with Sara widget -->
 <div id="chat-launcher" class="chat-launcher" role="button" tabindex="0" aria-label="Chat with Sara">
   <span class="chat-launcher-dot"></span>
@@ -1310,7 +1320,6 @@
     </div>
   </div>
   <form id="chat-form" class="chat-input-row">
-    <button type="button" id="chat-mic" class="chat-mic" aria-label="Talk with AI — hold to speak" title="Talk with AI">🎤</button>
     <input id="chat-input" type="text" placeholder="Type a message…" autocomplete="off" aria-label="Message Sara">
     <button type="submit" class="chat-send" aria-label="Send">➤</button>
   </form>
@@ -1328,7 +1337,7 @@
   var form = document.getElementById('chat-form');
   var input = document.getElementById('chat-input');
   var sendBtn = form.querySelector('.chat-send');
-  var micBtn = document.getElementById('chat-mic');
+  var micBtn = document.getElementById('voice-launcher');
   var voiceNote = document.getElementById('chat-voice-note');
   var navLink = document.getElementById('nav-chat-link');
   var navLinkMobile = document.getElementById('nav-chat-link-mobile');
@@ -1447,6 +1456,9 @@
   }
 
   micBtn.addEventListener('click', function () {
+    if (!panel.classList.contains('open')) {
+      openChat();
+    }
     if (!voiceInputSupported) {
       showVoiceNote('Voice input isn\'t supported in this browser — try Chrome or Edge.');
       return;
@@ -1464,6 +1476,9 @@
     } catch (e) {
       // Recognition may already be starting; ignore duplicate start errors
     }
+  });
+  micBtn.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); micBtn.click(); }
   });
 
   function escapeHtml(str) {
