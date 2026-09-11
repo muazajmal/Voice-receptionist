@@ -743,8 +743,15 @@
     transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
   }
   .voice-launcher:hover { transform: translateY(-2px); border-color: var(--brass-bright); }
-  .voice-launcher-icon { font-size: 22px; }
+  .voice-launcher-icon { width: 22px; height: 22px; color: var(--brass-bright); }
   .voice-launcher.unsupported { opacity: 0.35; cursor: not-allowed; }
+  .voice-launcher {
+    animation: voiceIdleGlow 2.6s infinite ease-in-out;
+  }
+  @keyframes voiceIdleGlow {
+    0%, 100% { box-shadow: 0 10px 30px rgba(0,0,0,0.25), 0 0 0 0 rgba(201,154,75,0.35); }
+    50% { box-shadow: 0 10px 30px rgba(0,0,0,0.25), 0 0 0 8px rgba(201,154,75,0); }
+  }
   .voice-launcher.listening {
     border-color: #dc2626;
     animation: micPulse 1.2s infinite ease-in-out;
@@ -754,6 +761,45 @@
     background: rgba(63,167,150,0.15);
   }
   .voice-launcher.hide { display: none; }
+
+  .voice-tooltip {
+    position: fixed;
+    right: 96px;
+    bottom: 90px;
+    background: var(--ink);
+    color: var(--paper-2);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 9px 16px;
+    border-radius: 10px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.3);
+    z-index: 79;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(24px) scale(0.9);
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+  .voice-tooltip.show {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  .voice-tooltip-arrow {
+    position: absolute;
+    right: 18px;
+    bottom: -5px;
+    width: 10px;
+    height: 10px;
+    background: var(--ink);
+    transform: rotate(45deg);
+  }
+  @media (max-width: 520px) {
+    .voice-tooltip { right: 82px; bottom: 78px; font-size: 12px; padding: 7px 12px; }
+    .voice-tooltip-arrow { right: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .voice-launcher { animation: none; }
+  }
 
   .chat-panel {
     position: fixed;
@@ -1294,7 +1340,16 @@
 
 <!-- Talk with Sara - standalone floating voice button -->
 <div id="voice-launcher" class="voice-launcher" role="button" tabindex="0" aria-label="Talk with Sara">
-  <span class="voice-launcher-icon">🎤</span>
+  <svg class="voice-launcher-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="4" y="10" width="2.2" height="4" rx="1.1" fill="currentColor"/>
+    <rect x="8" y="6" width="2.2" height="12" rx="1.1" fill="currentColor"/>
+    <rect x="12" y="2.5" width="2.2" height="19" rx="1.1" fill="currentColor"/>
+    <rect x="16" y="6" width="2.2" height="12" rx="1.1" fill="currentColor"/>
+    <rect x="20" y="10" width="2.2" height="4" rx="1.1" fill="currentColor"/>
+  </svg>
+</div>
+<div id="voice-tooltip" class="voice-tooltip">
+  Try talking to Sara <span class="voice-tooltip-arrow"></span>
 </div>
 
 <!-- Chat with Sara widget -->
@@ -1338,9 +1393,26 @@
   var input = document.getElementById('chat-input');
   var sendBtn = form.querySelector('.chat-send');
   var micBtn = document.getElementById('voice-launcher');
+  var voiceTooltip = document.getElementById('voice-tooltip');
   var voiceNote = document.getElementById('chat-voice-note');
   var navLink = document.getElementById('nav-chat-link');
   var navLinkMobile = document.getElementById('nav-chat-link-mobile');
+
+  var tooltipShown = false;
+  var tooltipTimer = window.setTimeout(function () {
+    if (!tooltipShown) {
+      voiceTooltip.classList.add('show');
+      tooltipShown = true;
+      window.setTimeout(function () { voiceTooltip.classList.remove('show'); }, 4500);
+    }
+  }, 3000);
+
+  function dismissVoiceTooltip() {
+    window.clearTimeout(tooltipTimer);
+    voiceTooltip.classList.remove('show');
+  }
+
+  micBtn.addEventListener('mouseenter', dismissVoiceTooltip);
 
   var wasVoiceInput = false;
   var isListening = false;
@@ -1397,6 +1469,7 @@
 
   function stopSpeaking() {
     if (voiceOutputSupported && synth.speaking) synth.cancel();
+    stopServerAudio();
     micBtn.classList.remove('speaking');
   }
 
@@ -1455,7 +1528,104 @@
     synth.speak(utter);
   }
 
+  // Wraps headerless raw PCM (as returned by the TTS backend) in a minimal WAV
+  // header so it's a format browsers can actually play via an <audio> element.
+  function pcmBase64ToWavBlob(base64, sampleRate, numChannels, bitsPerSample) {
+    var binary = atob(base64);
+    var pcmLength = binary.length;
+    var headerLength = 44;
+    var buffer = new ArrayBuffer(headerLength + pcmLength);
+    var view = new DataView(buffer);
+
+    function writeString(offset, str) {
+      for (var i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+    }
+
+    var byteRate = sampleRate * numChannels * (bitsPerSample / 8);
+    var blockAlign = numChannels * (bitsPerSample / 8);
+
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + pcmLength, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true); // PCM format
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, byteRate, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitsPerSample, true);
+    writeString(36, 'data');
+    view.setUint32(40, pcmLength, true);
+
+    var bytes = new Uint8Array(buffer, headerLength);
+    for (var j = 0; j < pcmLength; j++) bytes[j] = binary.charCodeAt(j);
+
+    return new Blob([buffer], { type: 'audio/wav' });
+  }
+
+  function parsePcmMimeType(mimeType) {
+    // Expected shape: "audio/l16; rate=24000; channels=1"
+    var result = { sampleRate: 24000, channels: 1, bitsPerSample: 16 };
+    if (!mimeType) return result;
+    var rateMatch = mimeType.match(/rate=(\d+)/);
+    var channelsMatch = mimeType.match(/channels=(\d+)/);
+    if (rateMatch) result.sampleRate = parseInt(rateMatch[1], 10);
+    if (channelsMatch) result.channels = parseInt(channelsMatch[1], 10);
+    return result;
+  }
+
+  var currentAudio = null;
+
+  function playServerAudio(base64, mimeType, onDone) {
+    try {
+      var info = parsePcmMimeType(mimeType);
+      var blob = pcmBase64ToWavBlob(base64, info.sampleRate, info.channels, info.bitsPerSample);
+      var url = URL.createObjectURL(blob);
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+      }
+      var audioEl = new Audio(url);
+      currentAudio = audioEl;
+      micBtn.classList.add('speaking');
+      audioEl.onended = function () {
+        micBtn.classList.remove('speaking');
+        URL.revokeObjectURL(url);
+        if (onDone) onDone();
+      };
+      audioEl.onerror = function () {
+        micBtn.classList.remove('speaking');
+        URL.revokeObjectURL(url);
+        if (onDone) onDone(true);
+      };
+      audioEl.play();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function stopServerAudio() {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
+    micBtn.classList.remove('speaking');
+  }
+
+  // Prefers real server-generated speech (consistent voice for every visitor);
+  // falls back to the browser's own voice if the server didn't return audio.
+  function speakReply(text, audioBase64, audioMimeType) {
+    if (audioBase64) {
+      var started = playServerAudio(audioBase64, audioMimeType);
+      if (started) return;
+    }
+    speak(text);
+  }
+
   micBtn.addEventListener('click', function () {
+    dismissVoiceTooltip();
     if (!panel.classList.contains('open')) {
       openChat();
     }
@@ -1575,7 +1745,7 @@
         hideTyping();
         var reply = data.reply || "Sorry, I didn't quite get that.";
         addBubble(reply, 'bot');
-        if (usedVoice) speak(reply);
+        if (usedVoice) speakReply(reply, data.audio_base64, data.audio_mime_type);
       })
       .catch(function () {
         hideTyping();
