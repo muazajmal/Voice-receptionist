@@ -494,6 +494,53 @@
   .chat-send:disabled { opacity: .45; cursor: default; }
   .chat-voice-note { font-size: 12px; color: var(--muted); text-align: center; padding: 0 12px 10px; background: var(--white); }
 
+  /* ---------- greeter: Sara says hello when the site opens ---------- */
+  .voice-tooltip { display: none; }
+  .greeter {
+    position: fixed; right: 24px; bottom: 96px; z-index: 85;
+    width: 340px; max-width: calc(100vw - 32px);
+    background: var(--white); color: var(--text);
+    border-radius: 20px; padding: 22px 22px 16px;
+    box-shadow: 0 28px 64px rgba(15,20,36,0.30), 0 0 0 1px rgba(220,184,119,0.30);
+    opacity: 0; transform: translateY(16px) scale(.97); pointer-events: none; visibility: hidden;
+    transition: opacity .45s ease, transform .45s cubic-bezier(.2,.8,.2,1), visibility 0s linear .45s;
+  }
+  .greeter.show { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition-delay: 0s; }
+  .greeter-close {
+    position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%;
+    border: 0; background: transparent; color: var(--muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .greeter-close:hover { background: var(--porcelain); color: var(--text); }
+  .greeter-close svg { width: 14px; height: 14px; }
+  .greeter-head { display: flex; align-items: center; margin-bottom: 14px; padding-right: 28px; }
+  .greeter-avatar { position: relative; width: 72px; height: 72px; flex-shrink: 0; margin-right: 14px; }
+  .greeter-avatar .sara-face { width: 72px; height: 72px; border-radius: 50%; }
+  .greeter-avatar::after {
+    content: ''; position: absolute; inset: -4px; border-radius: 50%;
+    border: 2px solid var(--brass); opacity: 0;
+  }
+  .greeter.speaking .greeter-avatar::after { animation: saraRing 1.4s ease-out infinite; }
+  @keyframes saraRing { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.22); } }
+  .sara-mouth { transform-box: fill-box; transform-origin: center top; }
+  .greeter.speaking .sara-mouth { animation: saraTalk .18s ease-in-out infinite alternate; }
+  @keyframes saraTalk { from { transform: scaleY(.55); } to { transform: scaleY(1.35); } }
+  .greeter-name { font-family: var(--serif); font-size: 26px; font-weight: 600; line-height: 1.1; }
+  .greeter-role { display: flex; align-items: center; font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .greeter-text { font-size: 15.5px; line-height: 1.55; margin-bottom: 16px; }
+  .greeter-actions { display: flex; flex-wrap: wrap; margin-bottom: 8px; }
+  .greeter-actions .btn { padding: 11px 18px; font-size: 14.5px; margin: 0 8px 8px 0; }
+  .btn-quiet { background: var(--porcelain); color: var(--ink); }
+  .btn-quiet:hover { background: var(--line); }
+  .greeter-sound {
+    display: inline-flex; align-items: center; border: 0; background: none; cursor: pointer;
+    font: inherit; font-size: 13.5px; color: var(--muted); padding: 4px 0;
+  }
+  .greeter-sound svg { width: 18px; height: 18px; margin-right: 6px; }
+  .greeter-sound:hover { color: var(--text); }
+  .chat-avatar { overflow: hidden; background: none; }
+  .chat-avatar .sara-face { width: 38px; height: 38px; }
+
   /* ---------- responsive ---------- */
   @media (max-width: 960px) {
     .nav-links { display: none; }
@@ -534,11 +581,13 @@
     .chat-launcher { right: 16px; bottom: 16px; width: 52px; height: 52px; }
     .voice-launcher { right: 80px; bottom: 16px; width: 52px; height: 52px; }
     .voice-tooltip { right: 80px; bottom: 80px; }
+    .greeter { right: 12px; left: 12px; width: auto; bottom: 80px; padding: 20px 18px 14px; }
   }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     *, *::before, *::after { transition: none !important; animation: none !important; }
     .js .ledger-row.pending { opacity: 1; transform: none; }
+    .greeter { transform: none; }
   }
 </style>
 </head>
@@ -788,6 +837,58 @@
   </div>
 </footer>
 
+<!-- Sara greets visitors when the site opens -->
+<div id="greeter" class="greeter" role="dialog" aria-label="Sara says hello" aria-hidden="true">
+  <button type="button" class="greeter-close" id="greeter-close" aria-label="Close greeting">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"/></svg>
+  </button>
+  <div class="greeter-head">
+    <div class="greeter-avatar"><svg class="sara-face" viewBox="0 0 200 200" aria-hidden="true">
+  <defs><clipPath id="saraClipG"><circle cx="100" cy="100" r="100"/></clipPath></defs>
+  <g clip-path="url(#saraClipG)">
+    <rect width="200" height="200" fill="#e9d6ae"/>
+    <path d="M48 104C42 60 68 30 101 30c34 0 58 28 52 74l8 72c-22 14-100 14-122 0z" fill="#2a1c17"/>
+    <path d="M24 200c4-34 34-52 76-52s72 18 76 52z" fill="#1b2340"/>
+    <path d="M88 118h24v34c-4 6-20 6-24 0z" fill="#d79a76"/>
+    <path d="M84 148l16 26 16-26c-6-3-26-3-32 0z" fill="#f2f3f5"/>
+    <path d="M70 152l30 44 30-44" fill="none" stroke="#c4964d" stroke-width="2.5"/>
+    <ellipse cx="68" cy="98" rx="6" ry="9" fill="#e3ab86"/>
+    <ellipse cx="132" cy="98" rx="6" ry="9" fill="#e3ab86"/>
+    <ellipse cx="100" cy="94" rx="32" ry="39" fill="#eab894"/>
+    <path d="M67 90c-2-34 18-50 37-50 24 0 36 18 32 46-9-14-26-23-44-24-7 13-15 21-25 28z" fill="#2a1c17"/>
+    <path d="M80 83q7-4 14-1M106 82q7-3 14 1" fill="none" stroke="#2a1c17" stroke-width="2.6" stroke-linecap="round"/>
+    <ellipse cx="87" cy="94" rx="3.6" ry="4.4" fill="#2a1c17"/>
+    <ellipse cx="113" cy="94" rx="3.6" ry="4.4" fill="#2a1c17"/>
+    <circle cx="88.3" cy="92.6" r="1.2" fill="#fff"/>
+    <circle cx="114.3" cy="92.6" r="1.2" fill="#fff"/>
+    <path d="M82 90.5q5-3.5 10 0M108 90.5q5-3.5 10 0" fill="none" stroke="#2a1c17" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M100 98q-3 9 1 11" fill="none" stroke="#c98a6a" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="80" cy="108" r="6.5" fill="#e88f7c" opacity=".35"/>
+    <circle cx="120" cy="108" r="6.5" fill="#e88f7c" opacity=".35"/>
+    <g class="sara-mouth"><path d="M90 116q10 11 20 0q-10 4-20 0z" fill="#a9504c"/></g>
+    <path d="M64 92c-2-40 16-58 36-58s38 18 36 58" fill="none" stroke="#c4964d" stroke-width="4" stroke-linecap="round"/>
+    <rect x="57" y="86" width="13" height="22" rx="6.5" fill="#141a2e"/>
+    <rect x="130" y="86" width="13" height="22" rx="6.5" fill="#141a2e"/>
+    <path d="M63 106c1 13 11 20 22 19" fill="none" stroke="#141a2e" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="87" cy="125" r="3.6" fill="#c4964d"/>
+  </g>
+</svg></div>
+    <div>
+      <div class="greeter-name">Sara</div>
+      <div class="greeter-role"><span class="chat-status-dot"></span>AI receptionist, online now</div>
+    </div>
+  </div>
+  <p class="greeter-text" aria-live="polite">Hi, welcome! I'm Sara. I answer calls, book appointments and take messages, day or night. Want to try me?</p>
+  <div class="greeter-actions">
+    <button type="button" class="btn btn-brass" id="greeter-talk">Talk to me</button>
+    <button type="button" class="btn btn-quiet" id="greeter-chat">Chat instead</button>
+  </div>
+  <button type="button" class="greeter-sound" id="greeter-sound">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8v4h3l4 3V5L6 8H3zM13.5 7.5a3.5 3.5 0 0 1 0 5M15.5 5a7 7 0 0 1 0 10"/></svg>
+    <span id="greeter-sound-label">Hear my greeting</span>
+  </button>
+</div>
+
 <!-- Talk to Sara: voice -->
 <div id="voice-launcher" class="voice-launcher" role="button" tabindex="0" aria-label="Talk to Sara out loud">
   <svg class="voice-launcher-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -809,7 +910,36 @@
 <div id="chat-panel" class="chat-panel" role="dialog" aria-label="Chat with Sara" aria-hidden="true">
   <div class="chat-panel-header">
     <div class="chat-panel-title">
-      <span class="chat-avatar" aria-hidden="true">S</span>
+      <span class="chat-avatar"><svg class="sara-face" viewBox="0 0 200 200" aria-hidden="true">
+  <defs><clipPath id="saraClipC"><circle cx="100" cy="100" r="100"/></clipPath></defs>
+  <g clip-path="url(#saraClipC)">
+    <rect width="200" height="200" fill="#e9d6ae"/>
+    <path d="M48 104C42 60 68 30 101 30c34 0 58 28 52 74l8 72c-22 14-100 14-122 0z" fill="#2a1c17"/>
+    <path d="M24 200c4-34 34-52 76-52s72 18 76 52z" fill="#1b2340"/>
+    <path d="M88 118h24v34c-4 6-20 6-24 0z" fill="#d79a76"/>
+    <path d="M84 148l16 26 16-26c-6-3-26-3-32 0z" fill="#f2f3f5"/>
+    <path d="M70 152l30 44 30-44" fill="none" stroke="#c4964d" stroke-width="2.5"/>
+    <ellipse cx="68" cy="98" rx="6" ry="9" fill="#e3ab86"/>
+    <ellipse cx="132" cy="98" rx="6" ry="9" fill="#e3ab86"/>
+    <ellipse cx="100" cy="94" rx="32" ry="39" fill="#eab894"/>
+    <path d="M67 90c-2-34 18-50 37-50 24 0 36 18 32 46-9-14-26-23-44-24-7 13-15 21-25 28z" fill="#2a1c17"/>
+    <path d="M80 83q7-4 14-1M106 82q7-3 14 1" fill="none" stroke="#2a1c17" stroke-width="2.6" stroke-linecap="round"/>
+    <ellipse cx="87" cy="94" rx="3.6" ry="4.4" fill="#2a1c17"/>
+    <ellipse cx="113" cy="94" rx="3.6" ry="4.4" fill="#2a1c17"/>
+    <circle cx="88.3" cy="92.6" r="1.2" fill="#fff"/>
+    <circle cx="114.3" cy="92.6" r="1.2" fill="#fff"/>
+    <path d="M82 90.5q5-3.5 10 0M108 90.5q5-3.5 10 0" fill="none" stroke="#2a1c17" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M100 98q-3 9 1 11" fill="none" stroke="#c98a6a" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="80" cy="108" r="6.5" fill="#e88f7c" opacity=".35"/>
+    <circle cx="120" cy="108" r="6.5" fill="#e88f7c" opacity=".35"/>
+    <g class="sara-mouth"><path d="M90 116q10 11 20 0q-10 4-20 0z" fill="#a9504c"/></g>
+    <path d="M64 92c-2-40 16-58 36-58s38 18 36 58" fill="none" stroke="#c4964d" stroke-width="4" stroke-linecap="round"/>
+    <rect x="57" y="86" width="13" height="22" rx="6.5" fill="#141a2e"/>
+    <rect x="130" y="86" width="13" height="22" rx="6.5" fill="#141a2e"/>
+    <path d="M63 106c1 13 11 20 22 19" fill="none" stroke="#141a2e" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="87" cy="125" r="3.6" fill="#c4964d"/>
+  </g>
+</svg></span>
       <div>
         <div class="chat-panel-name">Sara</div>
         <div class="chat-panel-status"><span class="chat-status-dot"></span>Usually replies in a few seconds</div>
@@ -1246,6 +1376,85 @@
   var voiceBtn = document.getElementById('meet-voice');
   if (chatBtn) chatBtn.addEventListener('click', function () { document.getElementById('chat-launcher').click(); });
   if (voiceBtn) voiceBtn.addEventListener('click', function () { document.getElementById('voice-launcher').click(); });
+})();
+</script>
+<script>
+(function () {
+  var greeter = document.getElementById('greeter');
+  if (!greeter) return;
+  var soundBtn = document.getElementById('greeter-sound');
+  var soundLabel = document.getElementById('greeter-sound-label');
+  var audio = new Audio('sara-greeting.mp3');
+  audio.preload = 'auto';
+  var waitingForTap = false;
+
+  function store(key, val) { try { if (val) sessionStorage.setItem(key, '1'); return sessionStorage.getItem(key) === '1'; } catch (e) { return false; } }
+
+  function setSpeaking(on) {
+    greeter.classList.toggle('speaking', on);
+    soundLabel.textContent = on ? 'Stop' : 'Hear my greeting';
+  }
+  audio.addEventListener('play', function () { setSpeaking(true); store('sara-greeted', true); });
+  audio.addEventListener('pause', function () { setSpeaking(false); });
+  audio.addEventListener('ended', function () { setSpeaking(false); });
+
+  function stopGreeting() { waitingForTap = false; if (!audio.paused) audio.pause(); try { audio.currentTime = 0; } catch (e) {} }
+
+  function playGreeting() {
+    var attempt;
+    try { audio.currentTime = 0; attempt = audio.play(); } catch (e) { attempt = null; }
+    if (attempt && attempt.catch) {
+      attempt.catch(function () {
+        // Browser blocked sound before any interaction: speak on the visitor's first tap instead
+        waitingForTap = true;
+        soundLabel.textContent = 'Tap anywhere to hear me';
+      });
+    }
+  }
+
+  function show() {
+    greeter.classList.add('show');
+    greeter.setAttribute('aria-hidden', 'false');
+    if (!store('sara-greeted')) playGreeting();
+  }
+
+  function hide(remember) {
+    stopGreeting();
+    greeter.classList.remove('show');
+    greeter.setAttribute('aria-hidden', 'true');
+    if (remember) store('sara-greet-closed', true);
+  }
+
+  // First tap anywhere plays the greeting if the browser blocked it,
+  // unless that tap was on a control that does something else.
+  function firstTap(e) {
+    if (!waitingForTap) return;
+    var t = e.target;
+    if (t.closest && t.closest('.greeter-actions, .greeter-close, .greeter-sound, #voice-launcher, #chat-launcher, #chat-panel, a, button, input, iframe')) {
+      waitingForTap = false; soundLabel.textContent = 'Hear my greeting'; return;
+    }
+    waitingForTap = false;
+    if (greeter.classList.contains('show')) playGreeting();
+  }
+  document.addEventListener('pointerdown', firstTap, true);
+  document.addEventListener('keydown', firstTap, true);
+
+  soundBtn.addEventListener('click', function () {
+    if (!audio.paused) { stopGreeting(); return; }
+    playGreeting();
+  });
+  document.getElementById('greeter-close').addEventListener('click', function () { hide(true); });
+  document.getElementById('greeter-talk').addEventListener('click', function () {
+    hide(true); document.getElementById('voice-launcher').click();
+  });
+  document.getElementById('greeter-chat').addEventListener('click', function () {
+    hide(true); document.getElementById('chat-launcher').click();
+  });
+  document.getElementById('chat-launcher').addEventListener('click', function () { hide(false); });
+  document.getElementById('voice-launcher').addEventListener('click', function () { hide(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && greeter.classList.contains('show')) hide(true); });
+
+  if (!store('sara-greet-closed')) window.setTimeout(show, 1200);
 })();
 </script>
 </body>
