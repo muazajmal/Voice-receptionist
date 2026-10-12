@@ -516,7 +516,7 @@
       <div class="way">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M5 10v4M9 6v12M13 3v18M17 6v12M21 10v4"/></svg>
         <h3>Out loud</h3>
-        <p>Talk to her through your microphone and hear her answer.</p>
+        <p>Open her panel, tap Voice, and talk to her through your microphone.</p>
         <button type="button" class="way-action" id="meet-voice">Start talking</button>
       </div>
     </div>
@@ -706,33 +706,30 @@
 <script>
 (function () {
   // Opens Sara (the Jotform AI agent) from any "Chat with Sara" / "Start talking" button on the page.
-  function agent() { return document.querySelector('.embedded-agent-container'); }
-  function openSara(mode) {
-    var root = agent();
-    if (!root) return false;
-    var target = mode === 'voice'
-      ? root.querySelector('button.newVoiceButton, button[aria-label="Talk"]')
-      : root.querySelector('.__chat, .ai-agent-chat-avatar-container, input[aria-label="Ask AI"]');
-    if (!target) return false;
-    target.click();
-    if (mode !== 'voice' && target.tagName === 'INPUT') target.focus();
+  // Her avatar toggles the panel, so only click it when she is closed. The click is deferred and
+  // stopped from bubbling, otherwise Jotform reads it as an outside click and closes her again.
+  function openSara() {
+    var root = document.querySelector('.embedded-agent-container');
+    var avatar = root && root.querySelector('.ai-agent-chat-avatar');
+    if (!avatar) return false;
+    if (!/\bopened\b/.test(root.className)) setTimeout(function () { avatar.click(); }, 60);
     return true;
   }
-  function wire(id, mode) {
+  function wire(id) {
     var el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('click', function (e) {
-      if (openSara(mode)) { e.preventDefault(); return; }
-      // Agent not loaded yet (slow network or blocked): fall back to the live demo line
       e.preventDefault();
-      window.location.href = 'tel:+16292054731';
+      e.stopPropagation();
+      // Agent not loaded yet (slow network or blocked): fall back to the live demo line
+      if (!openSara()) window.location.href = 'tel:+16292054731';
     });
   }
-  wire('nav-chat-link', 'chat');
-  wire('nav-chat-link-mobile', 'chat');
-  wire('footer-chat-link', 'chat');
-  wire('meet-chat', 'chat');
-  wire('meet-voice', 'voice');
+  wire('nav-chat-link');
+  wire('nav-chat-link-mobile');
+  wire('footer-chat-link');
+  wire('meet-chat');
+  wire('meet-voice');
   var mobileMenu = document.getElementById('mobile-menu'), toggle = document.getElementById('menu-toggle');
   var mobileLink = document.getElementById('nav-chat-link-mobile');
   if (mobileLink) mobileLink.addEventListener('click', function () {
