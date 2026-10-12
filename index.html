@@ -3,977 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sara — The AI Receptionist That Never Misses a Call</title>
-<meta name="description" content="Sara answers every call, books every appointment, and logs every request — 24/7. $199/month.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c99a4b'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='19' font-weight='700' fill='%2312172b' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
-<meta property="og:title" content="Sara — The AI Receptionist That Never Misses a Call">
-<meta property="og:description" content="Sara answers every call, books every appointment, and logs every request — 24/7. $199/month.">
+<title>Sara — AI receptionist for small businesses</title>
+<meta name="description" content="Sara answers your business phone 24/7, books appointments, opens tickets, routes transfers and takes callback requests. $199 a month, no setup fee.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23141a2e'/%3E%3Ctext x='16' y='22.5' font-family='Georgia,serif' font-size='19' fill='%23dcb877' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
+<meta property="og:title" content="Sara — AI receptionist for small businesses">
+<meta property="og:description" content="Sara answers your business phone 24/7, books appointments, opens tickets, routes transfers and takes callback requests.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#141a2e">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --ink: #12172b;
-    --ink-2: #1a2140;
-    --paper: #edeff3;
-    --paper-2: #ffffff;
-    --brass: #c99a4b;
-    --brass-bright: #e0b567;
-    --teal: #3fa796;
-    --slate: #8a93a6;
-    --slate-dark: #4b5468;
-    --line: rgba(138, 147, 166, 0.18);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  html { scroll-behavior: smooth; }
-
-  section[id], header[id] {
-    scroll-margin-top: 76px;
-  }
-
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--paper);
-    color: var(--ink);
-    line-height: 1.5;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
-  }
-
-  a { color: inherit; text-decoration: none; }
-
-  .display {
-    font-family: 'Fraunces', serif;
-    font-optical-sizing: auto;
-  }
-
-  .mono {
-    font-family: 'IBM Plex Mono', monospace;
-  }
-
-  .wrap {
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 0 28px;
-  }
-
-  /* ---- NAV ---- */
-  nav {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    background: rgba(18, 23, 43, 0.92);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-
-  .nav-inner {
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 18px 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .brand {
-    display: flex;
-    align-items: center;
-    color: var(--paper-2);
-  }
-  .brand > * + * { margin-left: 10px; }
-
-  .brand-mark {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, var(--brass), var(--brass-bright));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Fraunces', serif;
-    font-weight: 700;
-    font-size: 16px;
-    color: var(--ink);
-  }
-
-  .brand-name {
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 19px;
-    letter-spacing: 0.2px;
-  }
-
-  .nav-links {
-    display: flex;
-    align-items: center;
-  }
-
-  .nav-links a:not(.btn) {
-    color: var(--slate);
-    font-size: 14px;
-    font-weight: 500;
-    transition: color 0.15s ease;
-    margin-right: 32px;
-  }
-  .nav-links a:hover { color: var(--paper-2); }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 11px 22px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-  }
-  .btn:hover { transform: translateY(-1px); }
-
-  .btn-brass {
-    background: var(--brass);
-    color: var(--ink);
-  }
-  .btn-brass:hover { background: var(--brass-bright); box-shadow: 0 8px 20px rgba(201,154,75,0.35); }
-
-  .btn-ghost {
-    background: transparent;
-    color: var(--paper-2);
-    border: 1px solid rgba(255,255,255,0.2);
-  }
-  .btn-ghost:hover { border-color: rgba(255,255,255,0.5); }
-
-  /* ---- HERO ---- */
-  .hero {
-    background: radial-gradient(ellipse 900px 600px at 15% -10%, rgba(201,154,75,0.15), transparent),
-                linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%);
-    color: var(--paper-2);
-    padding: 92px 0 0;
-    overflow: hidden;
-  }
-
-  .hero-grid {
-    display: flex;
-    align-items: center;
-    padding-bottom: 64px;
-  }
-  .hero-grid > * {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-  .hero-grid > * + * {
-    margin-left: 56px;
-  }
-
-  .eyebrow {
-    display: inline-flex;
-    align-items: center;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.06em;
-    color: var(--brass-bright);
-    text-transform: uppercase;
-    margin-bottom: 22px;
-  }
-  .eyebrow > * + * { margin-left: 8px; }
-
-  .eyebrow-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--teal);
-    box-shadow: 0 0 0 4px rgba(63,167,150,0.2);
-  }
-
-  .hero h1 {
-    font-size: 52px;
-    line-height: 1.06;
-    font-weight: 600;
-    letter-spacing: -0.5px;
-    margin-bottom: 22px;
-  }
-
-  .hero h1 em {
-    font-style: italic;
-    color: var(--brass-bright);
-  }
-
-  .hero p.lede {
-    font-size: 18px;
-    color: rgba(237,239,243,0.72);
-    max-width: 460px;
-    margin-bottom: 34px;
-  }
-
-  .hero-ctas {
-    display: flex;
-    margin-bottom: 44px;
-  }
-  .hero-ctas > * + * { margin-left: 14px; }
-
-  .hero-note {
-    font-size: 13px;
-    color: var(--slate);
-  }
-
-  /* ---- LIVE LOG (signature element) ---- */
-  .log-panel {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5);
-  }
-
-  .log-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 18px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    background: rgba(0,0,0,0.15);
-  }
-
-  .log-header-title {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    color: var(--slate);
-    display: flex;
-    align-items: center;
-  }
-
-  .live-pill {
-    display: inline-flex;
-    align-items: center;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.05em;
-    color: var(--teal);
-    background: rgba(63,167,150,0.12);
-    border: 1px solid rgba(63,167,150,0.3);
-    padding: 3px 8px;
-    border-radius: 999px;
-  }
-
-  .live-pill > * + * { margin-left: 5px; }
-
-  .live-pill .dot {
-    width: 5px; height: 5px; border-radius: 50%;
-    background: var(--teal);
-    animation: pulse 1.8s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.35; }
-  }
-
-  .log-body {
-    padding: 6px 0;
-    max-height: 340px;
-    overflow: hidden;
-  }
-
-  .log-row {
-    display: flex;
-    align-items: center;
-    padding: 11px 18px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12.5px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-  }
-
-  .log-time {
-    color: var(--slate);
-    flex: 0 0 58px;
-  }
-
-  .log-tag {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding: 3px 7px;
-    border-radius: 5px;
-    text-align: center;
-    font-weight: 500;
-    flex: 0 0 78px;
-    margin-right: 12px;
-    margin-left: 12px;
-  }
-  .tag-appt   { background: rgba(63,167,150,0.15); color: var(--teal); }
-  .tag-ticket { background: rgba(224,110,90,0.15); color: #e06e5a; }
-  .tag-xfer   { background: rgba(160,130,220,0.15); color: #b09be0; }
-  .tag-cb     { background: rgba(201,154,75,0.18); color: var(--brass-bright); }
-
-  .log-text { color: rgba(237,239,243,0.82); flex: 1 1 auto; min-width: 0; }
-
-  /* ---- DEMO CALL ---- */
-  .demo-wrap {
-    background: var(--ink-2);
-    border-top: 1px solid rgba(255,255,255,0.06);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    padding: 56px 0;
-  }
-
-  .demo-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-  }
-  .demo-inner > * { margin: 10px 0; }
-
-  .demo-call-btn {
-    display: flex;
-    align-items: center;
-    background: var(--brass);
-    color: var(--ink);
-    padding: 16px 26px;
-    border-radius: 12px;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-  }
-  .demo-call-btn:hover {
-    background: var(--brass-bright);
-    transform: translateY(-1px);
-    box-shadow: 0 10px 26px rgba(201,154,75,0.35);
-  }
-
-  .demo-call-icon {
-    font-size: 26px;
-    margin-right: 14px;
-  }
-
-  .demo-call-label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    opacity: 0.75;
-  }
-
-  .demo-call-number {
-    display: block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 19px;
-    font-weight: 500;
-    margin-top: 2px;
-  }
-
-  /* ---- SECTIONS ---- */
-  section { padding: 96px 0; }
-
-  .section-head {
-    max-width: 560px;
-    margin-bottom: 56px;
-  }
-
-  .kicker {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--brass);
-    margin-bottom: 12px;
-    display: block;
-  }
-
-  .section-head h2 {
-    font-size: 36px;
-    font-weight: 600;
-    letter-spacing: -0.3px;
-    margin-bottom: 14px;
-  }
-
-  .section-head p {
-    color: var(--slate-dark);
-    font-size: 16px;
-  }
-
-  /* ---- FEATURE CARDS ---- */
-  .feature-grid {
-    display: flex;
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    overflow: hidden;
-  }
-
-  .feature-card {
-    background: var(--paper-2);
-    padding: 30px 26px;
-    flex: 1 1 0;
-    border-left: 1px solid var(--line);
-    transition: background 0.2s ease, box-shadow 0.2s ease;
-    position: relative;
-  }
-  .feature-card:hover {
-    background: #fbfaf7;
-    box-shadow: inset 0 3px 0 var(--brass);
-  }
-
-  .feature-card:first-child {
-    border-left: none;
-  }
-
-  .feature-tag {
-    display: inline-block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 3px 8px;
-    border-radius: 5px;
-    margin-bottom: 18px;
-  }
-
-  .feature-card h3 {
-    font-family: 'Fraunces', serif;
-    font-size: 19px;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-
-  .feature-card p {
-    font-size: 13.5px;
-    color: var(--slate-dark);
-    line-height: 1.55;
-  }
-
-  /* ---- PRICING ---- */
-  .pricing-wrap {
-    background: var(--ink);
-    color: var(--paper-2);
-  }
-
-  .price-card {
-    max-width: 420px;
-    margin: 0 auto;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 18px;
-    padding: 40px;
-    text-align: center;
-  }
-
-  .price-plan {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--brass-bright);
-    margin-bottom: 18px;
-  }
-
-  .price-amount {
-    font-family: 'Fraunces', serif;
-    font-size: 56px;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-
-  .price-amount span {
-    font-size: 16px;
-    font-weight: 400;
-    color: var(--slate);
-    font-family: 'Inter', sans-serif;
-  }
-
-  .price-list {
-    list-style: none;
-    text-align: left;
-    margin: 30px 0 34px;
-  }
-
-  .price-list li {
-    display: flex;
-    align-items: flex-start;
-    padding: 9px 0;
-    font-size: 14px;
-    color: rgba(237,239,243,0.85);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-  }
-  .check { margin-right: 10px; }
-
-  .price-list li:last-child { border-bottom: none; }
-
-  .check {
-    color: var(--teal);
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-
-  .price-card .btn { width: 100%; padding: 14px; font-size: 15px; }
-
-  .trust-badges {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 18px;
-  }
-  .trust-badges span {
-    font-size: 11.5px;
-    color: var(--slate);
-    font-family: 'IBM Plex Mono', monospace;
-    margin: 4px 10px;
-  }
-
-  /* ---- SIGNUP ---- */
-  .signup-wrap {
-    background: var(--paper);
-  }
-
-  .contact-wrap {
-    background: var(--ink-2);
-    padding: 90px 0;
-  }
-  .contact-wrap .kicker { color: var(--brass-bright); }
-  .contact-wrap h2 { color: var(--paper-2); }
-
-  .signup-frame {
-    background: var(--paper-2);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 20px 50px -25px rgba(18,23,43,0.25);
-  }
-
-  iframe.jotform {
-    width: 100%;
-    height: 900px;
-    border: none;
-    display: block;
-  }
-
-  /* ---- FAQ ---- */
-  .faq-item {
-    border-bottom: 1px solid var(--line);
-    padding: 26px 0;
-  }
-
-  .faq-item h3 {
-    font-family: 'Fraunces', serif;
-    font-size: 17px;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-
-  .faq-item p {
-    color: var(--slate-dark);
-    font-size: 14.5px;
-    max-width: 640px;
-  }
-
-  /* ---- FOOTER ---- */
-  footer {
-    background: var(--ink);
-    color: var(--slate);
-    padding: 48px 0;
-  }
-
-  .footer-inner {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .footer-inner > * { margin: 6px 0; }
-
-  .footer-links {
-    display: flex;
-  }
-  .footer-links a { margin-left: 24px; }
-  .footer-links a:first-child { margin-left: 0; }
-
-  .footer-links a {
-    font-size: 13px;
-    color: var(--slate);
-  }
-  .footer-links a:hover { color: var(--paper-2); }
-
-  .footer-copy {
-    font-size: 13px;
-  }
-  .footer-copy a:hover { color: var(--paper-2); text-decoration: underline; }
-
-  /* ---- MOBILE MENU ---- */
-  .menu-toggle {
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-  }
-  .menu-toggle span {
-    display: block;
-    width: 22px;
-    height: 2px;
-    background: var(--paper-2);
-    transition: transform 0.2s ease, opacity 0.2s ease;
-  }
-  .menu-toggle span + span { margin-top: 5px; }
-  .menu-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-  .menu-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
-  .menu-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-  .mobile-menu {
-    display: none;
-    flex-direction: column;
-    padding: 8px 28px 20px;
-    background: rgba(18, 23, 43, 0.98);
-    border-top: 1px solid rgba(255,255,255,0.08);
-  }
-  .mobile-menu.open { display: flex; }
-  .mobile-menu a:not(.btn) {
-    color: var(--slate);
-    font-size: 15px;
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-  }
-  .mobile-menu a:not(.btn):hover { color: var(--paper-2); }
-
-  /* ---- RESPONSIVE ---- */
-  @media (max-width: 880px) {
-    .hero-grid { flex-direction: column; align-items: stretch; }
-    .hero-grid > * + * { margin-left: 0; margin-top: 40px; }
-    .hero h1 { font-size: 38px; }
-    .nav-links { display: none; }
-    .menu-toggle { display: flex; }
-    .feature-grid { flex-wrap: wrap; border-radius: 16px; }
-    .feature-card {
-      flex: 1 1 50%;
-      border-left: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-    }
-    .feature-card:nth-child(odd) { border-left: none; }
-    .section-head h2 { font-size: 28px; }
-    iframe.jotform { height: 1100px; }
-    .demo-inner { flex-direction: column; align-items: flex-start; }
-  }
-
-  @media (max-width: 520px) {
-    .feature-grid { flex-direction: column; }
-    .feature-card { flex: 1 1 auto; border-left: none !important; border-bottom: 1px solid var(--line); }
-    .feature-card:last-child { border-bottom: none; }
-    .hero h1 { font-size: 32px; }
-    .hero-ctas { flex-direction: column; }
-    .hero-ctas > * + * { margin-left: 0; margin-top: 12px; }
-    .price-card { padding: 28px 22px; }
-  }
-
-  :focus-visible {
-    outline: 2px solid var(--brass-bright);
-    outline-offset: 2px;
-  }
-
-  .skip-link {
-    position: absolute;
-    left: -9999px;
-    top: 0;
-    background: var(--brass);
-    color: var(--ink);
-    padding: 12px 20px;
-    border-radius: 0 0 8px 0;
-    font-weight: 600;
-    font-size: 14px;
-    z-index: 200;
-  }
-  .skip-link:focus {
-    left: 0;
-  }
-
-  /* ---- CHAT WIDGET ---- */
-  .chat-launcher {
-    position: fixed;
-    right: 24px;
-    bottom: 24px;
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    background: var(--brass);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-    z-index: 80;
-    transition: transform 0.15s ease, background 0.15s ease;
-  }
-  .chat-launcher:hover { background: var(--brass-bright); transform: translateY(-2px); }
-  .chat-launcher-icon { font-size: 24px; }
-  .chat-launcher-dot {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--teal);
-    border: 2px solid var(--paper);
-  }
-  .chat-launcher.hide { display: none; }
-
-  .voice-launcher {
-    position: fixed;
-    right: 96px;
-    bottom: 24px;
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    background: var(--ink);
-    border: 2px solid var(--brass);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-    z-index: 80;
-    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
-  }
-  .voice-launcher:hover { transform: translateY(-2px); border-color: var(--brass-bright); }
-  .voice-launcher-icon { width: 22px; height: 22px; color: var(--brass-bright); }
-  .voice-launcher.unsupported { opacity: 0.35; cursor: not-allowed; }
-  .voice-launcher {
-    animation: voiceIdleGlow 2.6s infinite ease-in-out;
-  }
-  @keyframes voiceIdleGlow {
-    0%, 100% { box-shadow: 0 10px 30px rgba(0,0,0,0.25), 0 0 0 0 rgba(201,154,75,0.35); }
-    50% { box-shadow: 0 10px 30px rgba(0,0,0,0.25), 0 0 0 8px rgba(201,154,75,0); }
-  }
-  .voice-launcher.listening {
-    border-color: #dc2626;
-    animation: micPulse 1.2s infinite ease-in-out;
-  }
-  .voice-launcher.speaking {
-    border-color: var(--teal);
-    background: rgba(63,167,150,0.15);
-  }
-  .voice-launcher.hide { display: none; }
-
-  .voice-tooltip {
-    position: fixed;
-    right: 96px;
-    bottom: 90px;
-    background: var(--ink);
-    color: var(--paper-2);
-    font-size: 13px;
-    font-weight: 500;
-    padding: 9px 16px;
-    border-radius: 10px;
-    box-shadow: 0 12px 28px rgba(0,0,0,0.3);
-    z-index: 79;
-    white-space: nowrap;
-    opacity: 0;
-    transform: translateX(24px) scale(0.9);
-    pointer-events: none;
-    transition: opacity 0.35s ease, transform 0.35s ease;
-  }
-  .voice-tooltip.show {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-  .voice-tooltip-arrow {
-    position: absolute;
-    right: 18px;
-    bottom: -5px;
-    width: 10px;
-    height: 10px;
-    background: var(--ink);
-    transform: rotate(45deg);
-  }
-  @media (max-width: 520px) {
-    .voice-tooltip { right: 82px; bottom: 78px; font-size: 12px; padding: 7px 12px; }
-    .voice-tooltip-arrow { right: 14px; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .voice-launcher { animation: none; }
-  }
-
-  .chat-panel {
-    position: fixed;
-    right: 24px;
-    bottom: 94px;
-    width: 360px;
-    max-width: calc(100vw - 32px);
-    height: 480px;
-    max-height: calc(100vh - 140px);
-    background: var(--paper-2);
-    border-radius: 16px;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.3);
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-    z-index: 90;
-    border: 1px solid var(--line);
-  }
-  .chat-panel.open { display: flex; }
-
-  .chat-panel-header {
-    background: var(--ink);
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .chat-panel-title { display: flex; align-items: center; }
-  .chat-panel-title > * + * { margin-left: 10px; }
-  .chat-panel-name { color: var(--paper-2); font-weight: 600; font-size: 14px; }
-  .chat-panel-status {
-    color: var(--slate);
-    font-size: 11px;
-    display: flex;
-    align-items: center;
-  }
-  .chat-status-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--teal);
-    margin-right: 5px;
-    display: inline-block;
-  }
-  .chat-close {
-    background: none;
-    border: none;
-    color: var(--slate);
-    font-size: 15px;
-    cursor: pointer;
-    padding: 4px 6px;
-  }
-  .chat-close:hover { color: var(--paper-2); }
-
-  .chat-messages {
-    flex: 1 1 auto;
-    overflow-y: auto;
-    padding: 16px;
-    background: var(--paper);
-    display: flex;
-    flex-direction: column;
-  }
-  .chat-bubble {
-    max-width: 82%;
-    padding: 10px 13px;
-    border-radius: 12px;
-    font-size: 13.5px;
-    line-height: 1.45;
-    margin-bottom: 10px;
-    white-space: pre-wrap;
-  }
-  .chat-bubble-bot {
-    background: var(--paper-2);
-    border: 1px solid var(--line);
-    color: var(--ink);
-    align-self: flex-start;
-    border-bottom-left-radius: 3px;
-  }
-  .chat-bubble-user {
-    background: var(--brass);
-    color: var(--ink);
-    align-self: flex-end;
-    border-bottom-right-radius: 3px;
-  }
-  .chat-bubble-typing {
-    background: var(--paper-2);
-    border: 1px solid var(--line);
-    align-self: flex-start;
-    padding: 12px 15px;
-    border-radius: 12px;
-    border-bottom-left-radius: 3px;
-    margin-bottom: 10px;
-  }
-  .chat-bubble-typing span {
-    display: inline-block;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--slate);
-    animation: typingBounce 1.2s infinite ease-in-out;
-  }
-  .chat-bubble-typing span:nth-child(2) { animation-delay: 0.15s; margin-left: 4px; }
-  .chat-bubble-typing span:nth-child(3) { animation-delay: 0.3s; margin-left: 4px; }
-  @keyframes typingBounce {
-    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-    30% { transform: translateY(-4px); opacity: 1; }
-  }
-
-  .chat-input-row {
-    display: flex;
-    border-top: 1px solid var(--line);
-    background: var(--paper-2);
-    padding: 10px;
-  }
-  .chat-input-row input {
-    flex: 1 1 auto;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 9px 12px;
-    font-size: 13.5px;
-    font-family: inherit;
-    outline: none;
-  }
-  .chat-input-row input:focus { border-color: var(--brass); }
-  .chat-send {
-    background: var(--brass);
-    color: var(--ink);
-    border: none;
-    border-radius: 8px;
-    width: 38px;
-    margin-left: 8px;
-    font-size: 15px;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-  .chat-send:hover { background: var(--brass-bright); }
-  .chat-send:disabled { opacity: 0.5; cursor: default; }
-
-  @keyframes micPulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.35); }
-    50% { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
-  }
-
-  .chat-voice-note {
-    font-size: 11px;
-    color: var(--slate);
-    text-align: center;
-    padding: 4px 10px 0;
-    background: var(--paper-2);
-  }
-
-  @media (max-width: 520px) {
-    .chat-panel {
-      right: 12px;
-      left: 12px;
-      width: auto;
-      bottom: 86px;
-    }
-    .chat-launcher { right: 16px; bottom: 16px; }
-    .voice-launcher { right: 82px; bottom: 16px; width: 52px; height: 52px; }
-  }
-
-  /* ---- SCROLL REVEAL ---- */
-  .reveal {
-    opacity: 0;
-    transform: translateY(18px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-  }
-  .reveal.in-view {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .reveal { opacity: 1; transform: none; transition: none; }
-  }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js');</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -982,11 +23,11 @@
   "description": "Sara answers business phone calls, books appointments, logs support tickets, handles call transfers, and records callback requests — 24/7.",
   "offers": {
     "@type": "Offer",
-    "price": "29",
+    "price": "199",
     "priceCurrency": "USD",
     "priceSpecification": {
       "@type": "UnitPriceSpecification",
-      "price": "29",
+      "price": "199",
       "priceCurrency": "USD",
       "billingDuration": "P1M"
     }
@@ -998,6 +39,16 @@
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What kinds of businesses is Sara for?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Businesses that live on the phone and book appointments: clinics, dental and beauty practices, salons, and home service companies." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can callers still reach a real person?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. When a caller asks for someone, Sara notes why and transfers them to the right person or department. If no one is available, she takes a callback request." }
+    },
     {
       "@type": "Question",
       "name": "What does Sara actually connect to?",
@@ -1033,291 +84,763 @@
   ]
 }
 </script>
+<style>
+  :root {
+    --ink: #141a2e;
+    --ink-2: #1b2340;
+    --ink-line: rgba(220, 184, 119, 0.16);
+    --porcelain: #f2f3f5;
+    --white: #ffffff;
+    --brass: #c4964d;
+    --brass-light: #dcb877;
+    --brass-deep: #94692a;
+    --text: #141a2e;
+    --muted: #586075;
+    --mist: #a6aec0;
+    --line: #dfe2e8;
+
+    --c-appt: #7fbfa3;
+    --c-ticket: #e0948a;
+    --c-xfer: #aba3dd;
+    --c-cb: #dcb877;
+
+    --serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+    --sans: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --measure: 36rem;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  section[id], header[id] { scroll-margin-top: 80px; }
+
+  body {
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--porcelain);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  img, svg { display: block; }
+
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 32px; }
+
+  h1, h2, h3 { font-family: var(--serif); font-weight: 500; letter-spacing: -0.01em; }
+  h2 { font-size: clamp(36px, 4.4vw, 52px); line-height: 1.08; }
+  h3 { font-size: 26px; line-height: 1.2; font-weight: 600; }
+  p { max-width: var(--measure); }
+
+  :focus-visible { outline: 2px solid var(--brass-light); outline-offset: 3px; border-radius: 4px; }
+
+  .skip-link {
+    position: absolute; left: -9999px; top: 0; z-index: 200;
+    background: var(--brass); color: var(--ink);
+    padding: 12px 20px; font-weight: 600; font-size: 14px;
+  }
+  .skip-link:focus { left: 0; }
+
+  /* ---------- buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--sans); font-size: 15px; font-weight: 600;
+    padding: 14px 26px; border-radius: 999px; border: 1px solid transparent;
+    cursor: pointer; transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+  }
+  .btn-brass { background: var(--brass); color: var(--ink); }
+  .btn-brass:hover { background: var(--brass-light); }
+  .btn-line { border-color: rgba(255,255,255,0.28); color: var(--white); }
+  .btn-line:hover { border-color: var(--brass-light); color: var(--brass-light); }
+  .btn-ink { background: var(--ink); color: var(--white); }
+  .btn-ink:hover { background: var(--ink-2); }
+
+  /* ---------- nav ---------- */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(20, 26, 46, 0.94);
+    backdrop-filter: saturate(140%) blur(10px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+    border-bottom: 1px solid var(--ink-line);
+  }
+  .nav-inner {
+    max-width: 1160px; margin: 0 auto; padding: 16px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .brand { display: flex; align-items: baseline; color: var(--white); }
+  .brand-name { font-family: var(--serif); font-size: 30px; font-weight: 600; line-height: 1; }
+  .brand-tag { font-size: 13px; color: var(--mist); margin-left: 12px; }
+  .nav-links { display: flex; align-items: center; }
+  .nav-links a:not(.btn) {
+    font-size: 14.5px; color: var(--mist); margin-right: 30px; transition: color .2s ease;
+  }
+  .nav-links a:not(.btn):hover { color: var(--white); }
+  .nav-links .btn { padding: 10px 20px; font-size: 14px; }
+
+  .menu-toggle {
+    display: none; flex-direction: column; justify-content: center;
+    width: 40px; height: 40px; background: none; border: 0; cursor: pointer; padding: 9px;
+  }
+  .menu-toggle span { display: block; height: 1.5px; background: var(--white); transition: transform .2s ease, opacity .2s ease; }
+  .menu-toggle span + span { margin-top: 6px; }
+  .menu-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+  .menu-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+  .menu-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+  .mobile-menu { display: none; flex-direction: column; padding: 4px 32px 24px; border-top: 1px solid var(--ink-line); }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a:not(.btn) { color: var(--mist); font-size: 16px; padding: 14px 0; border-bottom: 1px solid var(--ink-line); }
+  .mobile-menu .btn { margin-top: 18px; }
+
+  /* ---------- hero ---------- */
+  .hero {
+    background:
+      radial-gradient(1100px 520px at 85% 0%, rgba(220,184,119,0.10), transparent 60%),
+      var(--ink);
+    color: var(--white);
+    padding: 96px 0 104px;
+    overflow: hidden;
+  }
+  .hero-grid { display: flex; align-items: center; }
+  .hero-copy { flex: 1 1 55%; min-width: 0; padding-right: 56px; }
+  .hero-ledger { flex: 1 1 45%; min-width: 0; }
+
+  .hero h1 {
+    font-size: clamp(50px, 6.2vw, 88px);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    margin-bottom: 30px;
+  }
+  .hero h1 .line { display: block; white-space: nowrap; }
+  .hero-lede { font-size: 19px; line-height: 1.6; color: #c9cedb; max-width: 30rem; margin-bottom: 40px; }
+  .hero-actions { display: flex; flex-wrap: wrap; align-items: center; }
+  .hero-actions > * { margin: 0 14px 14px 0; }
+  .hero-note { font-size: 14px; color: var(--mist); margin-top: 18px; }
+
+  /* the one signature element: today's front desk ledger */
+  .ledger {
+    background: rgba(255,255,255,0.035);
+    border: 1px solid var(--ink-line);
+    border-radius: 18px;
+    padding: 30px 32px 18px;
+  }
+  .ledger-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding-bottom: 18px; border-bottom: 1px solid var(--ink-line);
+  }
+  .ledger-title { font-family: var(--serif); font-size: 26px; font-weight: 600; }
+  .ledger-live { display: flex; align-items: center; font-size: 13px; color: var(--mist); }
+  .ledger-live::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--c-appt);
+    margin-right: 8px; box-shadow: 0 0 0 4px rgba(127,191,163,0.18);
+  }
+  .ledger-list { list-style: none; }
+  .ledger-row {
+    display: flex; align-items: baseline;
+    padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .ledger-row:last-child { border-bottom: 0; }
+  .ledger-time {
+    flex: 0 0 64px; font-size: 14px; color: var(--mist);
+    font-variant-numeric: tabular-nums;
+  }
+  .ledger-kind {
+    flex: 0 0 112px; display: flex; align-items: center;
+    font-size: 14px; font-weight: 600; color: var(--white);
+  }
+  .ledger-kind::before {
+    content: ''; width: 8px; height: 8px; border-radius: 50%; margin-right: 10px;
+    background: var(--dot, var(--c-appt));
+  }
+  .ledger-text { flex: 1 1 auto; min-width: 0; font-size: 15px; color: #d4d8e2; }
+  .k-appt { --dot: var(--c-appt); }
+  .k-ticket { --dot: var(--c-ticket); }
+  .k-xfer { --dot: var(--c-xfer); }
+  .k-cb { --dot: var(--c-cb); }
+
+  /* single orchestrated moment: calls arrive one by one on load */
+  .js .ledger-row.pending { opacity: 0; transform: translateY(6px); }
+  .ledger-row { transition: opacity .5s ease, transform .5s ease; }
+
+  /* ---------- sections ---------- */
+  .section { padding: 120px 0; }
+  .section-light { background: var(--porcelain); }
+  .section-white { background: var(--white); }
+  .section-intro { max-width: 40rem; margin-bottom: 64px; }
+  .section-intro h2 { margin-bottom: 18px; }
+  .section-intro p { color: var(--muted); font-size: 18px; }
+
+  /* what she handles: categories carry the same colors as the hero ledger */
+  .handles { display: flex; flex-wrap: wrap; margin: 0 -28px; }
+  .handle { flex: 1 1 50%; padding: 0 28px 52px; }
+  .handle-inner { border-top: 1px solid var(--line); padding-top: 26px; }
+  .handle h3 { display: flex; align-items: center; margin-bottom: 10px; }
+  .handle h3::before {
+    content: ''; width: 10px; height: 10px; border-radius: 50%; margin-right: 14px;
+    background: var(--dot); flex-shrink: 0;
+  }
+  .handle p { color: var(--muted); }
+
+  /* meet sara: three real ways to reach her */
+  .ways { display: flex; margin: 0 -16px; }
+  .way {
+    flex: 1 1 0; margin: 0 16px; padding: 34px 32px 32px;
+    background: var(--porcelain); border-radius: 18px;
+    display: flex; flex-direction: column;
+  }
+  .way svg { width: 28px; height: 28px; color: var(--brass-deep); margin-bottom: 22px; }
+  .way h3 { margin-bottom: 8px; }
+  .way p { color: var(--muted); margin-bottom: 26px; flex: 1 1 auto; }
+  .way-action {
+    align-self: flex-start; font: inherit; font-size: 15.5px; font-weight: 600; color: var(--ink);
+    background: none; border: 0; padding: 0 0 3px; cursor: pointer;
+    border-bottom: 1.5px solid var(--brass-deep); transition: color .2s ease, border-color .2s ease;
+  }
+  .way-action:hover { color: var(--brass-deep); }
+
+  /* how it works: a true sequence, so it's numbered */
+  .how { border-top: 1px solid var(--line); }
+  .steps { list-style: none; display: flex; margin: 0 -28px; }
+  .steps li { flex: 1 1 0; padding: 0 28px; }
+  .step-n {
+    display: block; font-family: var(--serif); font-size: 64px; line-height: 1; font-weight: 500;
+    color: var(--brass-deep); font-variant-numeric: lining-nums; margin-bottom: 18px;
+  }
+  .steps h3 { margin-bottom: 10px; }
+  .steps p { color: var(--muted); }
+
+  /* pricing */
+  .pricing { display: flex; align-items: flex-start; }
+  .pricing-copy { flex: 1 1 45%; padding-right: 72px; }
+  .pricing-copy h2 { margin-bottom: 18px; }
+  .pricing-copy p { color: var(--muted); font-size: 18px; }
+  .plan {
+    flex: 1 1 55%;
+    background: var(--ink); color: var(--white);
+    border-radius: 22px; padding: 44px 48px 40px;
+  }
+  .plan-name { font-size: 15px; color: var(--mist); margin-bottom: 6px; }
+  .plan-price { display: flex; align-items: baseline; margin-bottom: 30px; }
+  .plan-amount { font-family: var(--serif); font-size: 84px; line-height: 1; font-weight: 500; font-variant-numeric: lining-nums; }
+  .plan-per { font-size: 16px; color: var(--mist); margin-left: 12px; }
+  .plan-list { list-style: none; margin-bottom: 34px; }
+  .plan-list li {
+    display: flex; align-items: flex-start; padding: 12px 0;
+    border-top: 1px solid var(--ink-line); color: #d4d8e2; font-size: 16px;
+  }
+  .plan-list svg { width: 18px; height: 18px; margin: 4px 14px 0 0; flex-shrink: 0; color: var(--brass-light); }
+  .plan .btn { width: 100%; padding: 16px; font-size: 16px; }
+  .plan-terms { text-align: center; font-size: 14px; color: var(--mist); margin: 16px auto 0; }
+
+  /* signup + contact frames */
+  .frame {
+    background: var(--white); border: 1px solid var(--line); border-radius: 18px;
+    overflow: hidden;
+  }
+  iframe.jotform { width: 100%; height: 900px; border: 0; display: block; }
+
+  /* faq */
+  .faq { display: flex; align-items: flex-start; }
+  .faq-intro { flex: 0 0 34%; padding-right: 56px; }
+  .faq-intro p { color: var(--muted); margin-top: 16px; }
+  .faq-intro a { color: var(--text); border-bottom: 1px solid var(--brass-deep); }
+  .faq-list { flex: 1 1 auto; border-top: 1px solid var(--line); }
+  .faq-list details { border-bottom: 1px solid var(--line); }
+  .faq-list summary {
+    list-style: none; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 24px 0; font-family: var(--serif); font-size: 24px; font-weight: 600; line-height: 1.25;
+  }
+  .faq-list summary::-webkit-details-marker { display: none; }
+  .faq-list summary::after {
+    content: ''; width: 11px; height: 11px; flex-shrink: 0; margin: 0 6px 0 24px;
+    border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted);
+    transform: rotate(45deg) translateY(-4px); transition: transform .25s ease;
+  }
+  .faq-list details[open] summary::after { transform: rotate(-135deg) translateY(-2px); }
+  .faq-list details p { color: var(--muted); padding: 0 0 26px; }
+
+  /* contact */
+  .contact { background: var(--ink); color: var(--white); padding: 112px 0; }
+  .contact-grid { display: flex; align-items: flex-start; }
+  .contact-copy { flex: 0 0 38%; padding-right: 64px; }
+  .contact-copy h2 { margin-bottom: 18px; }
+  .contact-copy p { color: var(--mist); font-size: 18px; }
+  .contact .frame { flex: 1 1 auto; border-color: transparent; }
+  .contact iframe.jotform { height: 520px; }
+
+  /* footer */
+  footer { background: #0f1424; color: var(--mist); padding: 64px 0 40px; font-size: 14.5px; }
+  .footer-top { display: flex; justify-content: space-between; flex-wrap: wrap; padding-bottom: 40px; border-bottom: 1px solid var(--ink-line); }
+  .footer-top > * { margin-bottom: 16px; }
+  .footer-brand .brand-name { color: var(--white); }
+  .footer-brand p { margin-top: 12px; max-width: 22rem; }
+  .footer-cols { display: flex; }
+  .footer-col { margin-left: 72px; }
+  .footer-col h4 { font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: 14px; }
+  .footer-col a { display: block; padding: 4px 0; transition: color .2s ease; }
+  .footer-col a:hover { color: var(--white); }
+  .footer-bottom { display: flex; justify-content: space-between; flex-wrap: wrap; padding-top: 24px; }
+  .footer-bottom > * { margin-bottom: 8px; }
+  .footer-bottom a:hover { color: var(--white); }
+  .footer-bottom a + a { margin-left: 24px; }
+
+  /* ---------- floating voice + chat ---------- */
+  .chat-launcher, .voice-launcher {
+    position: fixed; bottom: 24px; width: 56px; height: 56px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 80;
+    box-shadow: 0 12px 30px rgba(15,20,36,0.28);
+    transition: transform .2s ease, background-color .2s ease, border-color .2s ease;
+  }
+  .chat-launcher { right: 24px; background: var(--brass); color: var(--ink); }
+  .chat-launcher:hover { background: var(--brass-light); transform: translateY(-2px); }
+  .chat-launcher svg { width: 24px; height: 24px; }
+  .chat-launcher-dot {
+    position: absolute; top: 3px; right: 3px; width: 12px; height: 12px; border-radius: 50%;
+    background: var(--c-appt); border: 2px solid var(--white);
+  }
+  .chat-launcher.hide { display: none; }
+
+  .voice-launcher { right: 94px; background: var(--ink); border: 1.5px solid var(--brass); color: var(--brass-light); }
+  .voice-launcher:hover { transform: translateY(-2px); border-color: var(--brass-light); }
+  .voice-launcher-icon { width: 22px; height: 22px; }
+  .voice-launcher.unsupported { opacity: .4; cursor: not-allowed; }
+  .voice-launcher.listening { border-color: #e0948a; animation: listenPulse 1.2s infinite ease-in-out; }
+  .voice-launcher.speaking { border-color: var(--c-appt); color: var(--c-appt); }
+  @keyframes listenPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(224,148,138,0.45); }
+    50% { box-shadow: 0 0 0 8px rgba(224,148,138,0); }
+  }
+
+  .voice-tooltip {
+    position: fixed; right: 94px; bottom: 92px; z-index: 79;
+    background: var(--white); color: var(--ink); font-size: 14px; font-weight: 500;
+    padding: 10px 16px; border-radius: 10px; white-space: nowrap;
+    box-shadow: 0 14px 34px rgba(15,20,36,0.22);
+    opacity: 0; transform: translateY(6px); pointer-events: none;
+    transition: opacity .35s ease, transform .35s ease;
+  }
+  .voice-tooltip.show { opacity: 1; transform: translateY(0); }
+  .voice-tooltip-arrow {
+    position: absolute; right: 22px; bottom: -5px; width: 10px; height: 10px;
+    background: var(--white); transform: rotate(45deg);
+  }
+
+  .chat-panel {
+    position: fixed; right: 24px; bottom: 24px; z-index: 90;
+    width: 380px; max-width: calc(100vw - 32px);
+    height: 540px; max-height: calc(100vh - 48px);
+    background: var(--white); border-radius: 20px; overflow: hidden;
+    box-shadow: 0 30px 70px rgba(15,20,36,0.32), 0 0 0 1px rgba(220,184,119,0.28);
+    display: none; flex-direction: column;
+  }
+  .chat-panel.open { display: flex; }
+  .chat-panel-header {
+    background: var(--ink); color: var(--white);
+    padding: 18px 20px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .chat-panel-title { display: flex; align-items: center; }
+  .chat-avatar {
+    width: 38px; height: 38px; border-radius: 50%; background: var(--brass);
+    color: var(--ink); display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-size: 22px; font-weight: 600; margin-right: 12px;
+  }
+  .chat-panel-name { font-family: var(--serif); font-size: 22px; font-weight: 600; line-height: 1.1; }
+  .chat-panel-status { font-size: 12.5px; color: var(--mist); display: flex; align-items: center; margin-top: 2px; }
+  .chat-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--c-appt); margin-right: 6px; }
+  .chat-close {
+    width: 34px; height: 34px; border-radius: 50%; border: 0; background: transparent;
+    color: var(--mist); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .chat-close:hover { background: rgba(255,255,255,0.08); color: var(--white); }
+  .chat-close svg { width: 16px; height: 16px; }
+
+  .chat-messages {
+    flex: 1 1 auto; overflow-y: auto; padding: 20px;
+    background: var(--porcelain); display: flex; flex-direction: column;
+  }
+  .chat-bubble {
+    max-width: 84%; padding: 11px 15px; border-radius: 16px;
+    font-size: 15px; line-height: 1.5; margin-bottom: 10px; white-space: pre-wrap;
+  }
+  .chat-bubble-bot { background: var(--white); color: var(--text); align-self: flex-start; border-bottom-left-radius: 5px; border: 1px solid var(--line); }
+  .chat-bubble-user { background: var(--ink); color: var(--white); align-self: flex-end; border-bottom-right-radius: 5px; }
+  .chat-bubble-typing {
+    align-self: flex-start; background: var(--white); border: 1px solid var(--line);
+    padding: 14px 16px; border-radius: 16px; border-bottom-left-radius: 5px; margin-bottom: 10px;
+  }
+  .chat-bubble-typing span {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--mist); animation: typing 1.2s infinite ease-in-out;
+  }
+  .chat-bubble-typing span + span { margin-left: 4px; }
+  .chat-bubble-typing span:nth-child(2) { animation-delay: .15s; }
+  .chat-bubble-typing span:nth-child(3) { animation-delay: .3s; }
+  @keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: .5; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+  .chat-input-row { display: flex; padding: 12px; background: var(--white); border-top: 1px solid var(--line); }
+  .chat-input-row input {
+    flex: 1 1 auto; border: 1px solid var(--line); border-radius: 999px;
+    padding: 11px 16px; font: inherit; font-size: 15px; color: var(--text); outline: none;
+  }
+  .chat-input-row input:focus { border-color: var(--brass); }
+  .chat-send {
+    width: 44px; height: 44px; margin-left: 8px; border-radius: 50%; border: 0;
+    background: var(--ink); color: var(--white); cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .chat-send svg { width: 18px; height: 18px; }
+  .chat-send:hover { background: var(--ink-2); }
+  .chat-send:disabled { opacity: .45; cursor: default; }
+  .chat-voice-note { font-size: 12px; color: var(--muted); text-align: center; padding: 0 12px 10px; background: var(--white); }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 960px) {
+    .nav-links { display: none; }
+    .menu-toggle { display: flex; }
+    .hero { padding: 64px 0 72px; }
+    .hero-grid { flex-direction: column; align-items: stretch; }
+    .hero-copy { padding-right: 0; margin-bottom: 56px; }
+    .hero h1 { font-size: clamp(48px, 9vw, 80px); }
+    .pricing, .faq, .contact-grid { flex-direction: column; }
+    .pricing-copy, .faq-intro, .contact-copy { padding-right: 0; margin-bottom: 40px; flex-basis: auto; }
+    .plan { width: 100%; }
+    .contact .frame { width: 100%; }
+    .footer-col { margin-left: 0; margin-right: 56px; }
+    .ways, .steps { flex-direction: column; }
+    .way { margin-bottom: 20px; }
+    .steps li { padding-bottom: 40px; }
+  }
+  @media (max-width: 640px) {
+    body { font-size: 16px; }
+    .wrap, .nav-inner { padding-left: 20px; padding-right: 20px; }
+    .mobile-menu { padding-left: 20px; padding-right: 20px; }
+    .brand-tag { display: none; }
+    .hero h1 .line { white-space: normal; }
+    .section { padding: 84px 0; }
+    .handle { flex-basis: 100%; padding-bottom: 36px; }
+    .handles, .steps, .ways { margin-left: 0; margin-right: 0; }
+    .handle, .steps li { padding-left: 0; padding-right: 0; }
+    .way { margin-left: 0; margin-right: 0; padding: 28px 24px; }
+    .ledger { padding: 22px 20px 10px; }
+    .ledger-row { flex-wrap: wrap; }
+    .ledger-time { flex-basis: 56px; }
+    .ledger-text { flex-basis: 100%; padding: 4px 0 0 56px; }
+    .plan { padding: 34px 26px 30px; }
+    .plan-amount { font-size: 68px; }
+    iframe.jotform { height: 1100px; }
+    .contact iframe.jotform { height: 600px; }
+    .chat-panel { right: 12px; left: 12px; width: auto; bottom: 12px; max-width: none; }
+    .chat-launcher { right: 16px; bottom: 16px; width: 52px; height: 52px; }
+    .voice-launcher { right: 80px; bottom: 16px; width: 52px; height: 52px; }
+    .voice-tooltip { right: 80px; bottom: 80px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+    .js .ledger-row.pending { opacity: 1; transform: none; }
+  }
+</style>
 </head>
 <body>
 
 <a href="#main-content" class="skip-link">Skip to content</a>
 
-<nav>
+<nav aria-label="Main">
   <div class="nav-inner">
-    <div class="brand">
-      <span class="brand-mark">S</span>
+    <a href="#main-content" class="brand" aria-label="Sara, home">
       <span class="brand-name">Sara</span>
-    </div>
+      <span class="brand-tag">AI receptionist</span>
+    </a>
     <div class="nav-links">
       <a href="#demo">Talk to Sara</a>
       <a href="#" id="nav-chat-link">Chat with Sara</a>
-      <a href="#what">What she handles</a>
+      <a href="#how">How it works</a>
       <a href="#pricing">Pricing</a>
       <a href="#faq">FAQ</a>
-      <a href="#signup" class="btn btn-brass">Get Sara — $199/mo</a>
+      <a href="#signup" class="btn btn-brass">Get Sara</a>
     </div>
-    <button id="menu-toggle" class="menu-toggle" aria-label="Open menu" aria-expanded="false">
+    <button id="menu-toggle" class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
       <span></span><span></span><span></span>
     </button>
   </div>
   <div id="mobile-menu" class="mobile-menu">
     <a href="#demo">Talk to Sara</a>
     <a href="#" id="nav-chat-link-mobile">Chat with Sara</a>
-    <a href="#what">What she handles</a>
+    <a href="#how">How it works</a>
     <a href="#pricing">Pricing</a>
     <a href="#faq">FAQ</a>
-    <a href="#signup" class="btn btn-brass" style="margin-top: 8px;">Get Sara — $199/mo</a>
+    <a href="#signup" class="btn btn-brass">Get Sara</a>
   </div>
 </nav>
 
 <main id="main-content">
+
 <header class="hero">
   <div class="wrap hero-grid">
-    <div>
-      <span class="eyebrow"><span class="eyebrow-dot"></span> AI RECEPTIONIST · LIVE 24/7</span>
-      <h1 class="display">The phone rings.<br>Sara <em>picks up</em>.</h1>
-      <p class="lede">Sara answers every call, books the appointment, opens the ticket, or takes the message — logged and ready before you've even seen the notification.</p>
-      <div class="hero-ctas">
-        <a href="#signup" class="btn btn-brass">Get Sara — $199/mo</a>
-        <a href="#what" class="btn btn-ghost">See what she logs</a>
+    <div class="hero-copy">
+      <h1><span class="line">The phone rings.</span> <span class="line">Sara picks up.</span></h1>
+      <p class="hero-lede">Sara answers every call to your business, day or night. She books the appointment, opens the ticket, routes the transfer or takes the callback request, and logs it before you've seen the notification.</p>
+      <div class="hero-actions">
+        <a href="#signup" class="btn btn-brass">Get Sara</a>
+        <a href="tel:+16292054731" class="btn btn-line">Call the demo line</a>
       </div>
-      <p class="hero-note">No setup fee. Cancel anytime. Live in minutes once your line is connected.</p>
+      <p class="hero-note">$199 a month. No setup fee. Cancel anytime.</p>
     </div>
 
-    <div class="log-panel">
-      <div class="log-header">
-        <span class="log-header-title">front-desk-log.txt</span>
-        <span class="live-pill"><span class="dot"></span> LIVE</span>
-      </div>
-      <div class="log-body">
-        <div class="log-row">
-          <span class="log-time">14:30</span>
-          <span class="log-tag tag-appt">Booked</span>
-          <span class="log-text">Appointment — dental cleaning, Thu 10am</span>
+    <div class="hero-ledger">
+      <div class="ledger" aria-label="Example of a day of calls Sara handled">
+        <div class="ledger-head">
+          <span class="ledger-title">Today at the front desk</span>
+          <span class="ledger-live">Live</span>
         </div>
-        <div class="log-row">
-          <span class="log-time">13:15</span>
-          <span class="log-tag tag-ticket">Ticket</span>
-          <span class="log-text">AC unit not cooling — priority: high</span>
-        </div>
-        <div class="log-row">
-          <span class="log-time">11:52</span>
-          <span class="log-tag tag-xfer">Transfer</span>
-          <span class="log-text">Caller asked for sales — line was busy</span>
-        </div>
-        <div class="log-row">
-          <span class="log-time">10:20</span>
-          <span class="log-tag tag-cb">Callback</span>
-          <span class="log-text">Requested callback — tomorrow 3pm</span>
-        </div>
-        <div class="log-row">
-          <span class="log-time">09:47</span>
-          <span class="log-tag tag-appt">Booked</span>
-          <span class="log-text">Haircut &amp; beard trim, today 5pm</span>
-        </div>
-        <div class="log-row">
-          <span class="log-time">09:03</span>
-          <span class="log-tag tag-ticket">Ticket</span>
-          <span class="log-text">Billing question — resolved on call</span>
-        </div>
+        <ol class="ledger-list">
+          <li class="ledger-row pending"><span class="ledger-time">14:30</span><span class="ledger-kind k-appt">Booked</span><span class="ledger-text">Dental cleaning, Thursday at 10 am</span></li>
+          <li class="ledger-row pending"><span class="ledger-time">13:15</span><span class="ledger-kind k-ticket">Ticket</span><span class="ledger-text">AC unit not cooling, marked high priority</span></li>
+          <li class="ledger-row pending"><span class="ledger-time">11:52</span><span class="ledger-kind k-xfer">Transfer</span><span class="ledger-text">Caller asked for sales, passed to the team</span></li>
+          <li class="ledger-row pending"><span class="ledger-time">10:20</span><span class="ledger-kind k-cb">Callback</span><span class="ledger-text">Wants a call back tomorrow at 3 pm</span></li>
+          <li class="ledger-row pending"><span class="ledger-time">09:47</span><span class="ledger-kind k-appt">Booked</span><span class="ledger-text">Haircut and beard trim, today at 5 pm</span></li>
+          <li class="ledger-row pending"><span class="ledger-time">09:03</span><span class="ledger-kind k-ticket">Ticket</span><span class="ledger-text">Billing question, answered on the call</span></li>
+        </ol>
       </div>
     </div>
   </div>
 </header>
 
-<section id="demo" class="demo-wrap">
-  <div class="wrap demo-inner">
-    <div>
-      <span class="kicker" style="color: var(--brass-bright);">Try it right now</span>
-      <h2 class="display" style="color: var(--paper-2);">Don't take our word for it. Call her.</h2>
-      <p style="color: rgba(237,239,243,0.7); font-size: 15px; max-width: 440px; margin-top: 10px;">This is Sara's real live demo line — available 24/7. Call it, ask about hours, try booking something. It's really her.</p>
-    </div>
-    <a href="tel:+16292054731" class="demo-call-btn">
-      <span class="demo-call-icon">📞</span>
-      <span>
-        <span class="demo-call-label">Call the live demo</span>
-        <span class="demo-call-number">+1 (629) 205-4731</span>
-      </span>
-    </a>
-  </div>
-</section>
-
-<section id="what" class="wrap">
-  <div class="section-head">
-    <span class="kicker">What she handles</span>
-    <h2 class="display">Four things ring your phone. Sara catches all four.</h2>
-    <p>Every call becomes a structured record — not a voicemail you'll forget to check.</p>
-  </div>
-
-  <div class="feature-grid">
-    <div class="feature-card">
-      <span class="feature-tag tag-appt">Appointments</span>
-      <h3 class="display">Booked, not missed</h3>
-      <p>Sara checks your hours, offers real slots, and confirms the booking on the call — no back-and-forth.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-tag tag-ticket">Tickets</span>
-      <h3 class="display">Issues, logged and flagged</h3>
-      <p>Problems get captured with priority attached, so nothing urgent sits unread in an inbox.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-tag tag-xfer">Transfers</span>
-      <h3 class="display">Routed to the right desk</h3>
-      <p>When a caller needs a human, Sara notes why and hands it off cleanly instead of a dead transfer.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-tag tag-cb">Callbacks</span>
-      <h3 class="display">A promise that's tracked</h3>
-      <p>"We'll call you back" becomes a logged commitment with a time attached — not a guess.</p>
-    </div>
-  </div>
-</section>
-
-<section id="pricing" class="pricing-wrap">
+<section id="demo" class="section section-white meet">
   <div class="wrap">
-    <div class="section-head" style="margin: 0 auto 56px; text-align: center;">
-      <span class="kicker" style="text-align:center;">Pricing</span>
-      <h2 class="display">One plan. Everything included.</h2>
-      <p style="color: var(--slate);">No setup fee. No tiers to compare.</p>
+    <div class="section-intro">
+      <h2>Meet Sara before you hire her</h2>
+      <p>She's live right now. Call her, write to her, or talk to her out loud from this page. Ask about hours, or book a test appointment.</p>
     </div>
-
-    <div class="price-card">
-      <div class="price-plan">Sara Starter</div>
-      <div class="price-amount">$199<span>/month</span></div>
-      <ul class="price-list">
-        <li><span class="check">✓</span> Answers calls 24/7</li>
-        <li><span class="check">✓</span> Books appointments directly to your calendar</li>
-        <li><span class="check">✓</span> Logs tickets, transfers &amp; callbacks automatically</li>
-        <li><span class="check">✓</span> Live activity dashboard</li>
-        <li><span class="check">✓</span> Chrome extension for at-a-glance activity</li>
-      </ul>
-      <a href="#signup" class="btn btn-brass">Get Sara now</a>
-      <div class="trust-badges">
-        <span>No setup fee</span>
-        <span>Cancel anytime</span>
-        <span>Live in minutes</span>
+    <div class="ways">
+      <div class="way">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>
+        <h3>On the phone</h3>
+        <p>The same line your customers would call. Available 24/7.</p>
+        <a class="way-action" href="tel:+16292054731">+1 (629) 205-4731</a>
+      </div>
+      <div class="way">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.1A8 8 0 1 1 20 12z"/></svg>
+        <h3>In a chat</h3>
+        <p>Type a question and she answers in a few seconds.</p>
+        <button type="button" class="way-action" id="meet-chat">Open the chat</button>
+      </div>
+      <div class="way">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M5 10v4M9 6v12M13 3v18M17 6v12M21 10v4"/></svg>
+        <h3>Out loud</h3>
+        <p>Speak through your microphone and hear her reply. Works in Chrome and Edge.</p>
+        <button type="button" class="way-action" id="meet-voice">Start talking</button>
       </div>
     </div>
   </div>
 </section>
 
-<section id="signup" class="signup-wrap">
+<section id="what" class="section section-light">
   <div class="wrap">
-    <div class="section-head">
-      <span class="kicker">Get started</span>
-      <h2 class="display">Set Sara up for your business</h2>
-      <p>Fill this in and you're on the Starter plan. Takes about two minutes.</p>
+    <div class="section-intro">
+      <h2>Every call ends somewhere useful</h2>
+      <p>Sara sorts each call into one of four outcomes and writes it to your activity dashboard, so nothing waits in a voicemail box.</p>
     </div>
-    <div class="signup-frame">
-      <iframe
-        class="jotform"
-        src="https://form.jotform.com/262402560714046"
-        title="Sara Voice Receptionist - Starter Plan Signup"
-        loading="lazy">
-      </iframe>
-    </div>
-  </div>
-</section>
-
-<section id="faq" class="wrap">
-  <div class="section-head">
-    <span class="kicker">Questions</span>
-    <h2 class="display">Before you call the phone company</h2>
-  </div>
-
-  <div class="faq-list">
-    <div class="faq-item">
-      <h3 class="display">What does Sara actually connect to?</h3>
-      <p>Sara runs on your own automation workflow and writes every appointment, ticket, transfer, and callback to your activity dashboard in real time.</p>
-    </div>
-    <div class="faq-item">
-      <h3 class="display">Can I see the activity feed anywhere else?</h3>
-      <p>Yes — the web dashboard and the Chrome extension both show the same live feed, so you can check in from your desk or your browser toolbar.</p>
-    </div>
-    <div class="faq-item">
-      <h3 class="display">Is there a setup fee?</h3>
-      <p>No. $199/month covers everything on the Starter plan — no separate onboarding charge.</p>
-    </div>
-    <div class="faq-item">
-      <h3 class="display">Can I cancel anytime?</h3>
-      <p>Yes, it's a month-to-month subscription with no minimum commitment.</p>
+    <div class="handles">
+      <div class="handle k-appt"><div class="handle-inner">
+        <h3>Appointments</h3>
+        <p>She checks your hours, offers open times and confirms the booking before the caller hangs up.</p>
+      </div></div>
+      <div class="handle k-ticket"><div class="handle-inner">
+        <h3>Tickets</h3>
+        <p>Problems are written down with the caller's details and a priority, so urgent ones stand out.</p>
+      </div></div>
+      <div class="handle k-xfer"><div class="handle-inner">
+        <h3>Transfers</h3>
+        <p>When a caller needs a person, she notes why and passes them to the right desk.</p>
+      </div></div>
+      <div class="handle k-cb"><div class="handle-inner">
+        <h3>Callbacks</h3>
+        <p>If you can't take the call, she records when the caller wants to hear back.</p>
+      </div></div>
     </div>
   </div>
 </section>
 
-<section id="contact" class="contact-wrap">
+<section id="how" class="section section-white how">
   <div class="wrap">
-    <div class="section-head" style="margin: 0 auto 40px; text-align: center;">
-      <span class="kicker" style="text-align:center;">Not ready yet?</span>
-      <h2 class="display">Ask a quick question</h2>
-      <p style="color: var(--slate-dark);">No commitment — just tell us what you're wondering about.</p>
+    <div class="section-intro">
+      <h2>From sign-up to answered calls</h2>
     </div>
-    <div class="signup-frame" style="max-width: 560px; margin: 0 auto;">
-      <iframe
-        class="jotform"
-        style="height: 480px;"
-        src="https://form.jotform.com/262473414277056"
-        title="Quick Question - Contact Sara"
-        loading="lazy">
-      </iframe>
+    <ol class="steps">
+      <li><span class="step-n">1</span><h3>Tell us about your business</h3><p>Fill in the sign-up form with your hours, services and the questions customers usually ask.</p></li>
+      <li><span class="step-n">2</span><h3>We connect your phone line</h3><p>You get a number for Sara, or forward your existing one. We load your details so she answers like your own staff.</p></li>
+      <li><span class="step-n">3</span><h3>Sara takes the calls</h3><p>Every booking, ticket, transfer and callback appears on your dashboard as it happens.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section id="pricing" class="section section-white">
+  <div class="wrap pricing">
+    <div class="pricing-copy">
+      <h2>One plan, everything included</h2>
+      <p>No tiers to compare and no setup fee. You pay monthly and can cancel whenever you like.</p>
+    </div>
+    <div class="plan">
+      <p class="plan-name">Sara Starter</p>
+      <div class="plan-price"><span class="plan-amount">$199</span><span class="plan-per">per month</span></div>
+      <ul class="plan-list">
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>Answers calls 24/7</li>
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>Books appointments into your schedule</li>
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>Logs tickets, transfers and callbacks</li>
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>Live activity dashboard</li>
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>Chrome extension for your browser toolbar</li>
+      </ul>
+      <a href="#signup" class="btn btn-brass">Get Sara</a>
+      <p class="plan-terms">Month to month. Cancel anytime.</p>
     </div>
   </div>
 </section>
+
+<section id="signup" class="section section-light">
+  <div class="wrap">
+    <div class="section-intro">
+      <h2>Set Sara up for your business</h2>
+      <p>Tell us about your business. It takes about two minutes, and we'll be in touch to connect your phone line.</p>
+    </div>
+    <div class="frame">
+      <iframe class="jotform" src="https://form.jotform.com/262402560714046" title="Sara Starter plan signup" loading="lazy"></iframe>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="section section-white">
+  <div class="wrap faq">
+    <div class="faq-intro">
+      <h2>Questions</h2>
+      <p>Something else? <a href="#contact">Send us a question</a> or call the demo line.</p>
+    </div>
+    <div class="faq-list">
+      <details>
+        <summary>What kinds of businesses is Sara for?</summary>
+        <p>Businesses that live on the phone and book appointments: clinics, dental and beauty practices, salons, and home service companies.</p>
+      </details>
+      <details>
+        <summary>Can callers still reach a real person?</summary>
+        <p>Yes. When a caller asks for someone, Sara notes why and transfers them to the right person or department. If no one is available, she takes a callback request.</p>
+      </details>
+      <details>
+        <summary>What does Sara actually connect to?</summary>
+        <p>Sara runs on your own automation workflow and writes every appointment, ticket, transfer, and callback to your activity dashboard in real time.</p>
+      </details>
+      <details>
+        <summary>Can I see the activity feed anywhere else?</summary>
+        <p>Yes — the web dashboard and the Chrome extension both show the same live feed, so you can check in from your desk or your browser toolbar.</p>
+      </details>
+      <details>
+        <summary>Is there a setup fee?</summary>
+        <p>No. $199/month covers everything on the Starter plan — no separate onboarding charge.</p>
+      </details>
+      <details>
+        <summary>Can I cancel anytime?</summary>
+        <p>Yes, it's a month-to-month subscription with no minimum commitment.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="contact">
+  <div class="wrap contact-grid">
+    <div class="contact-copy">
+      <h2>Ask a quick question</h2>
+      <p>Not ready to sign up? Send a question and we'll reply by email.</p>
+    </div>
+    <div class="frame">
+      <iframe class="jotform" src="https://form.jotform.com/262473414277056" title="Ask Sara a quick question" loading="lazy"></iframe>
+    </div>
+  </div>
+</section>
+
 </main>
 
 <footer>
   <div class="wrap">
-    <div class="footer-inner" style="margin-bottom: 18px;">
-      <span class="footer-copy">© 2026 Sara. All rights reserved.</span>
-      <div class="footer-links">
-        <a href="#demo">Talk to Sara</a>
-        <a href="#" id="footer-chat-link">Chat with Sara</a>
-        <a href="#contact">Quick question</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#faq">FAQ</a>
-        <a href="#signup">Get Sara</a>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <span class="brand-name">Sara</span>
+        <p>AI receptionist for small businesses. Answers your phone 24/7.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="#demo">Talk to Sara</a>
+          <a href="#" id="footer-chat-link">Chat with Sara</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <a href="mailto:muazajmal112@gmail.com">muazajmal112@gmail.com</a>
+          <a href="tel:+16292054731">+1 (629) 205-4731</a>
+        </div>
       </div>
     </div>
-    <div class="footer-inner" style="padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.08);">
-      <span class="footer-copy">
-        <a href="mailto:muazajmal112@gmail.com">muazajmal112@gmail.com</a>
-        &nbsp;·&nbsp;
-        <a href="tel:+16292054731">+1 (629) 205-4731</a>
-        &nbsp;— live 24/7
-      </span>
-      <span class="footer-copy">
-        <a href="privacy.html">Privacy Policy</a>
-        &nbsp;·&nbsp;
-        <a href="terms.html">Terms of Service</a>
-      </span>
+    <div class="footer-bottom">
+      <span>© 2026 Sara</span>
+      <span><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a></span>
     </div>
   </div>
 </footer>
 
+<!-- Talk to Sara: voice -->
+<div id="voice-launcher" class="voice-launcher" role="button" tabindex="0" aria-label="Talk to Sara out loud">
+  <svg class="voice-launcher-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="4" y="10" width="2.2" height="4" rx="1.1" fill="currentColor"/>
+    <rect x="8" y="6" width="2.2" height="12" rx="1.1" fill="currentColor"/>
+    <rect x="12" y="2.5" width="2.2" height="19" rx="1.1" fill="currentColor"/>
+    <rect x="16" y="6" width="2.2" height="12" rx="1.1" fill="currentColor"/>
+    <rect x="20" y="10" width="2.2" height="4" rx="1.1" fill="currentColor"/>
+  </svg>
+</div>
+<div id="voice-tooltip" class="voice-tooltip" aria-hidden="true">Talk to Sara out loud<span class="voice-tooltip-arrow"></span></div>
+
+<!-- Chat with Sara -->
+<div id="chat-launcher" class="chat-launcher" role="button" tabindex="0" aria-label="Chat with Sara">
+  <span class="chat-launcher-dot"></span>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.1A8 8 0 1 1 20 12z"/></svg>
+</div>
+
+<div id="chat-panel" class="chat-panel" role="dialog" aria-label="Chat with Sara" aria-hidden="true">
+  <div class="chat-panel-header">
+    <div class="chat-panel-title">
+      <span class="chat-avatar" aria-hidden="true">S</span>
+      <div>
+        <div class="chat-panel-name">Sara</div>
+        <div class="chat-panel-status"><span class="chat-status-dot"></span>Usually replies in a few seconds</div>
+      </div>
+    </div>
+    <button id="chat-close" class="chat-close" aria-label="Close chat">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"/></svg>
+    </button>
+  </div>
+  <div id="chat-messages" class="chat-messages" aria-live="polite">
+    <div class="chat-bubble chat-bubble-bot">Hi, I'm Sara. Ask me about pricing, what I handle, or how to get set up.</div>
+  </div>
+  <form id="chat-form" class="chat-input-row">
+    <input id="chat-input" type="text" placeholder="Write a message" autocomplete="off" aria-label="Message Sara">
+    <button type="submit" class="chat-send" aria-label="Send message">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 16V4M5 9l5-5 5 5"/></svg>
+    </button>
+  </form>
+  <div id="chat-voice-note" class="chat-voice-note" style="display:none;"></div>
+</div>
+
 <script>
 (function () {
-  var revealTargets = document.querySelectorAll(
-    '.section-head, .feature-card, .price-card, .demo-inner > *, .log-panel'
-  );
-  revealTargets.forEach(function (el) { el.classList.add('reveal'); });
-
-  document.querySelectorAll('.feature-grid .feature-card').forEach(function (el, i) {
-    el.style.transitionDelay = (i * 70) + 'ms';
+  var rows = document.querySelectorAll('.ledger-row.pending');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  rows.forEach(function (row, i) {
+    if (reduce) { row.classList.remove('pending'); return; }
+    window.setTimeout(function () { row.classList.remove('pending'); }, 350 + i * 280);
   });
-
-  if ('IntersectionObserver' in window) {
-    var observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('in-view');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-
-    revealTargets.forEach(function (el) { observer.observe(el); });
-  } else {
-    revealTargets.forEach(function (el) { el.classList.add('in-view'); });
-  }
 })();
 </script>
-
 <script>
 (function () {
   var toggle = document.getElementById('menu-toggle');
@@ -1336,51 +859,6 @@
   });
 })();
 </script>
-
-
-<!-- Talk with Sara - standalone floating voice button -->
-<div id="voice-launcher" class="voice-launcher" role="button" tabindex="0" aria-label="Talk with Sara">
-  <svg class="voice-launcher-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="4" y="10" width="2.2" height="4" rx="1.1" fill="currentColor"/>
-    <rect x="8" y="6" width="2.2" height="12" rx="1.1" fill="currentColor"/>
-    <rect x="12" y="2.5" width="2.2" height="19" rx="1.1" fill="currentColor"/>
-    <rect x="16" y="6" width="2.2" height="12" rx="1.1" fill="currentColor"/>
-    <rect x="20" y="10" width="2.2" height="4" rx="1.1" fill="currentColor"/>
-  </svg>
-</div>
-<div id="voice-tooltip" class="voice-tooltip">
-  Try talking to Sara <span class="voice-tooltip-arrow"></span>
-</div>
-
-<!-- Chat with Sara widget -->
-<div id="chat-launcher" class="chat-launcher" role="button" tabindex="0" aria-label="Chat with Sara">
-  <span class="chat-launcher-dot"></span>
-  <span class="chat-launcher-icon">💬</span>
-</div>
-
-<div id="chat-panel" class="chat-panel" aria-hidden="true">
-  <div class="chat-panel-header">
-    <div class="chat-panel-title">
-      <span class="brand-mark" style="width:26px;height:26px;font-size:13px;">S</span>
-      <div>
-        <div class="chat-panel-name">Chat with Sara</div>
-        <div class="chat-panel-status"><span class="chat-status-dot"></span> Usually replies instantly</div>
-      </div>
-    </div>
-    <button id="chat-close" class="chat-close" aria-label="Close chat">✕</button>
-  </div>
-  <div id="chat-messages" class="chat-messages">
-    <div class="chat-bubble chat-bubble-bot">
-      Hi, I'm Sara 👋 Ask me anything about pricing, what I handle, or how to get set up.
-    </div>
-  </div>
-  <form id="chat-form" class="chat-input-row">
-    <input id="chat-input" type="text" placeholder="Type a message…" autocomplete="off" aria-label="Message Sara">
-    <button type="submit" class="chat-send" aria-label="Send">➤</button>
-  </form>
-  <div id="chat-voice-note" class="chat-voice-note" style="display:none;"></div>
-</div>
-
 <script>
 (function () {
   var CHAT_WEBHOOK_URL = 'https://muazajmal212.app.n8n.cloud/webhook/sara-chat';
@@ -1743,13 +1221,15 @@
       })
       .then(function (data) {
         hideTyping();
-        var reply = data.reply || "Sorry, I didn't quite get that.";
+        var reply = String(data.reply || "I didn't catch that. Could you rephrase it?")
+          .replace(/\*\*(.+?)\*\*/g, '$1')
+          .replace(/(^|\s)\*(\S.*?\S|\S)\*(?=\s|$|[.,!?])/g, '$1$2');
         addBubble(reply, 'bot');
         if (usedVoice) speakReply(reply, data.audio_base64, data.audio_mime_type);
       })
       .catch(function () {
         hideTyping();
-        var fallback = "I'm having trouble connecting right now — try calling the live demo at +1 (629) 205-4731, or the form below.";
+        var fallback = "I can't reach the chat service right now. Call me at +1 (629) 205-4731, or use the question form on this page.";
         addBubble(fallback, 'bot');
         if (usedVoice) speak(fallback);
       })
@@ -1760,6 +1240,13 @@
   });
 })();
 </script>
-
+<script>
+(function () {
+  var chatBtn = document.getElementById('meet-chat');
+  var voiceBtn = document.getElementById('meet-voice');
+  if (chatBtn) chatBtn.addEventListener('click', function () { document.getElementById('chat-launcher').click(); });
+  if (voiceBtn) voiceBtn.addEventListener('click', function () { document.getElementById('voice-launcher').click(); });
+})();
+</script>
 </body>
 </html>
