@@ -583,12 +583,20 @@
   .sara-send:hover { background: rgba(240,205,143,0.14); }
   .sara-send svg { width: 18px; height: 18px; }
   .sara-foot { font-size: 12px; color: var(--dim); text-align: center; padding: 0 16px 12px; }
+  .sara-chips { display: flex; flex-wrap: wrap; justify-content: flex-end; padding: 0 12px 6px; flex-shrink: 0; }
+  .sara-chips[hidden] { display: none; }
+  .sara-chips button {
+    margin: 0 0 8px 8px; padding: 8px 14px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 14px; font-weight: 600;
+    color: var(--gold); background: rgba(240,205,143,0.08); border: 1px solid rgba(240,205,143,0.32); transition: background-color .2s ease;
+  }
+  .sara-chips button:hover { background: rgba(240,205,143,0.16); }
 
   @media (max-width: 680px) {
     .sara-launcher { right: 14px; bottom: 14px; padding-right: 16px; font-size: 14px; }
     .sara-greet { right: 14px; bottom: 76px; }
     .sara-panel { inset: 0; right: 0; bottom: 0; width: 100%; height: 100%; height: 100dvh; border-radius: 0; border: 0; }
     .sara-stage { padding-top: 14px; }
+    html.sara-lock, html.sara-lock body { overflow: hidden; }
   }
   @media (prefers-reduced-motion: reduce) {
     .sara-orb span { transform: none !important; }
@@ -1029,7 +1037,10 @@
         <h2 id="sara-title">Sara</h2>
         <p class="sara-status" id="sara-status" aria-live="polite">Online</p>
       </div>
-      <button type="button" class="sara-icon" id="sara-sound" aria-pressed="true" aria-label="Sara's voice">
+      <button type="button" class="sara-icon" id="sara-reset" aria-label="Start a new conversation" title="New conversation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.5"/><path d="M4 4v4.5h4.5"/></svg>
+      </button>
+      <button type="button" class="sara-icon" id="sara-sound" aria-pressed="true" aria-label="Sara's voice" title="Sara's voice on or off">
         <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
         <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>
       </button>
@@ -1042,6 +1053,11 @@
     </div>
 
     <ol class="sara-log" id="sara-log" aria-live="polite" aria-label="Conversation"></ol>
+    <div class="sara-chips" id="sara-chips" hidden>
+      <button type="button">What can you do?</button>
+      <button type="button">How much is Sara?</button>
+      <button type="button">Book a test appointment</button>
+    </div>
 
     <form class="sara-input" id="sara-form" autocomplete="off">
       <button type="button" class="sara-mic" id="sara-mic" aria-pressed="false" aria-label="Talk to Sara">
@@ -1240,12 +1256,13 @@
   var $ = function (id) { return document.getElementById(id); };
   var root = $('sara'), panel = $('sara-panel'), launcher = $('sara-launcher'), greet = $('sara-greet');
   var log = $('sara-log'), hint = $('sara-hint'), statusEl = $('sara-status'), orb = $('sara-orb');
-  var mic = $('sara-mic'), form = $('sara-form'), input = $('sara-text'), soundBtn = $('sara-sound');
+  var mic = $('sara-mic'), form = $('sara-form'), input = $('sara-text'), soundBtn = $('sara-sound'), chips = $('sara-chips');
 
   function store(key, val) { try { if (val === undefined) return sessionStorage.getItem(key); sessionStorage.setItem(key, val); } catch (e) { return null; } }
   var history = [];
   try { history = JSON.parse(store('sara-history') || '[]') || []; } catch (e) { history = []; }
-  var sessionId = store('sara-session') || ('web-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8));
+  function newSessionId() { return 'web-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+  var sessionId = store('sara-session') || newSessionId();
   store('sara-session', sessionId);
   var soundOn = store('sara-sound') !== 'off';
 
@@ -1292,8 +1309,19 @@
   }
   function renderHistory() {
     log.innerHTML = '';
+    chips.hidden = history.length > 0;
     if (!history.length) { addMsg('sara', GREETING); return; }
     history.forEach(function (m) { addMsg(m.role === 'user' ? 'you' : 'sara', m.text); });
+  }
+  function resetConversation() {
+    turn++; stopSpeaking();
+    if (rec && listening) { try { rec.abort(); } catch (e) {} }
+    listening = false; talkMode = false; busy = false;
+    history = []; store('sara-history', '[]');
+    sessionId = newSessionId(); store('sara-session', sessionId);
+    renderHistory();
+    setState('idle', idleHint());
+    input.focus();
   }
 
   // ---------- audio out ----------
@@ -1369,16 +1397,41 @@
     return fetch(url, { method: 'POST', body: new URLSearchParams(fields), signal: ctrl ? ctrl.signal : undefined })
       .then(function (r) { clearTimeout(timer); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
   }
+  function retry(fn) {
+    // one more try after a dropped connection or server hiccup (never after our own timeout)
+    return fn().catch(function (e) {
+      if (e && e.name === 'AbortError') throw e;
+      return new Promise(function (r) { setTimeout(r, 1200); }).then(fn);
+    });
+  }
+  function splitForSpeech(text) {
+    // First sentence on its own so Sara starts talking sooner; the rest is generated meanwhile.
+    var parts = (text.match(/[^.!?]+[.!?]+["')\]]*\s*|[^.!?]+$/g) || [text]).map(function (t) { return t.trim(); }).filter(Boolean);
+    if (parts.length < 2) return [text];
+    var cut = parts[0].length < 25 && parts.length > 2 ? 2 : 1;
+    return [parts.slice(0, cut).join(' '), parts.slice(cut).join(' ')].filter(Boolean);
+  }
+  function fetchVoice(text) {
+    return retry(function () { return post(VOICE, { text: text, session_id: sessionId }, 30000); })
+      .then(function (j) { if (!j || !j.audio_base64) throw new Error('no audio'); return decode(j.audio_base64, j.audio_mime_type); });
+  }
   function speak(text, myTurn) {
     if (!soundOn || myTurn !== turn || !ensureAudio()) return Promise.resolve(false);
     hint.textContent = 'Sara is about to speak';
-    return post(VOICE, { text: text, session_id: sessionId }, 30000)
-      .then(function (j) {
-        if (myTurn !== turn) return false;
-        if (!j || !j.audio_base64) throw new Error('no audio');
-        return decode(j.audio_base64, j.audio_mime_type).then(function (buf) { return myTurn === turn ? playBuffer(buf) : false; });
-      })
-      .catch(function () { return myTurn === turn ? speakWithBrowser(text) : false; });
+    var parts = splitForSpeech(text);
+    var jobs = parts.map(fetchVoice);
+    jobs.forEach(function (j) { j.catch(function () {}); });
+    var i = 0;
+    function next() {
+      if (myTurn !== turn) return Promise.resolve(false);
+      if (i >= jobs.length) return Promise.resolve(true);
+      var idx = i++;
+      return jobs[idx].then(
+        function (buf) { return myTurn === turn ? playBuffer(buf).then(next) : false; },
+        // her own voice failed: the browser's voice reads it, but only if she hadn't started yet
+        function () { return myTurn === turn && idx === 0 ? speakWithBrowser(text) : true; });
+    }
+    return next();
   }
 
   // ---------- a turn of conversation ----------
@@ -1394,7 +1447,11 @@
     remember('user', text);
     var typing = addTyping();
     setState('thinking', 'Sara is thinking');
-    post(ASSIST, { message: text, history: JSON.stringify(past), session_id: sessionId, voice: 'no' }, 45000)
+    chips.hidden = true;
+    if (navigator.onLine === false) {
+      return setTimeout(function () { typing.remove(); busy = false; talkMode = false; addMsg('sara', "You seem to be offline. Check your connection and try again."); setState('idle', idleHint()); }, 300);
+    }
+    retry(function () { return post(ASSIST, { message: text, history: JSON.stringify(past), session_id: sessionId, voice: 'no' }, 45000); })
       .then(function (j) {
         var reply = j && j.reply ? String(j.reply).trim() : '';
         if (!reply) throw new Error('empty');
@@ -1402,8 +1459,10 @@
         addMsg('sara', reply);
         remember('sara', reply);
         busy = false;
-        return speak(reply, myTurn).then(function () {
-          if (myTurn !== turn) return;
+        if (j.limited) talkMode = false;   // usage cap reached: no more listening loop, and no paid voice
+        var spoken = j.limited ? (soundOn ? speakWithBrowser(reply) : Promise.resolve(false)) : speak(reply, myTurn);
+        return spoken.then(function () {
+          if (myTurn !== turn) { if (!listening && root.getAttribute('data-state') === 'thinking') setState('idle', idleHint()); return; }
           setState('idle', idleHint());
           if (talkMode && !panel.hidden) listen();
         });
@@ -1464,6 +1523,7 @@
     hideGreet();
     var wasHidden = panel.hidden;
     panel.hidden = false;
+    document.documentElement.classList.add('sara-lock');
     launcher.setAttribute('aria-expanded', 'true');
     if (wasHidden) { renderHistory(); setState('idle', idleHint()); }
     ensureAudio();                // must start inside the click so Sara's voice is allowed to play
@@ -1476,6 +1536,7 @@
     if (rec && listening) { try { rec.abort(); } catch (e) {} }
     listening = false; talkMode = false;
     panel.hidden = true;
+    document.documentElement.classList.remove('sara-lock');
     launcher.setAttribute('aria-expanded', 'false');
     launcher.focus();
   }
@@ -1491,6 +1552,17 @@
   });
   launcher.addEventListener('click', function () { open('chat'); });
   $('sara-close').addEventListener('click', close);
+  $('sara-reset').addEventListener('click', resetConversation);
+  chips.addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b || busy) return;
+    ensureAudio();
+    send(b.textContent, false);
+  });
+  document.addEventListener('visibilitychange', function () {
+    // leaving the tab stops the mic and Sara's voice
+    if (document.hidden && !panel.hidden) { turn++; stopSpeaking(); if (listening) stopListening(); else if (!busy) setState('idle', idleHint()); }
+  });
   $('sara-greet-close').addEventListener('click', hideGreet);
   $('sara-greet-voice').addEventListener('click', function () { open('voice'); });
   $('sara-greet-chat').addEventListener('click', function () { open('chat'); });
