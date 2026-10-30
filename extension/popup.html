@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sara</title>
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+<header class="top">
+  <span class="mini-orb" aria-hidden="true"></span>
+  <div class="id"><b id="biz">Sara</b><small id="status">Live call feed</small></div>
+  <button class="icon" id="refresh" type="button" title="Refresh" aria-label="Refresh" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.4-5.7L20 8.5"/><path d="M20 4v4.5h-4.5"/></svg>
+  </button>
+</header>
+
+<section id="signin" hidden>
+  <h1 id="si-title">Sign in</h1>
+  <p class="lead" id="si-lead">Use the email your business signed up to Sara with. We'll email you a 6-digit code.</p>
+  <form id="form-email" novalidate>
+    <label for="si-email">Email</label>
+    <input class="field" id="si-email" type="email" autocomplete="email" placeholder="you@business.com" required>
+    <button class="btn gold" type="submit">Email me a code</button>
+  </form>
+  <form id="form-code" novalidate hidden>
+    <label for="si-code">6-digit code</label>
+    <input class="field code" id="si-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" required>
+    <button class="btn gold" type="submit">Sign in</button>
+    <p class="links"><button class="link" type="button" id="si-back">Different email</button><button class="link" type="button" id="si-resend">New code</button></p>
+  </form>
+  <p class="msg" id="si-msg" role="status" aria-live="polite"></p>
+</section>
+
+<section id="feedview" hidden>
+  <div class="stats">
+    <div style="--k:#7fd1ad"><b id="s-upcoming">–</b><span>Upcoming</span></div>
+    <div style="--k:#f0968a"><b id="s-tickets">–</b><span>Open tickets</span></div>
+    <div style="--k:#b3a8f5"><b id="s-xfers">–</b><span>Transfers</span></div>
+    <div style="--k:#f0cd8f"><b id="s-cbs">–</b><span>Callbacks</span></div>
+  </div>
+  <ul class="feed" id="feed"></ul>
+  <footer class="foot">
+    <a class="btn small gold" id="open-dash" href="#" target="_blank">Open full dashboard</a>
+    <label class="toggle"><input type="checkbox" id="notify" checked> Notify me</label>
+    <button class="link" type="button" id="signout">Sign out</button>
+  </footer>
+</section>
+
+<script src="shared.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>

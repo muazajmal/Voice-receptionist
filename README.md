@@ -4,6 +4,10 @@ Sara answers business phone calls 24/7. She books appointments, opens support ti
 
 **Try her live:** https://voice-receptionist-puce.vercel.app
 
+## For customers
+- **Dashboard** (`/dashboard.html`): businesses sign in with an emailed 6-digit code and see only their own appointments, tickets, transfers and callbacks, refreshed every 30 seconds.
+- **Chrome extension** (`/extension`, download at `/extension.html`): the same live feed in the browser toolbar, with a badge count and desktop notifications.
+
 ## Built with
 Retell AI · n8n (webhooks and REST APIs) · Google Gemini · Google Sheets API · Gmail API · WhatsApp Business Cloud API · Next.js, React and Tailwind CSS (dashboard) · JavaScript with the Web Speech and Web Audio APIs (this website) · Vercel
 

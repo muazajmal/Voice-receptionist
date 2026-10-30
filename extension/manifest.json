@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Sara: Live Call Feed",
+  "short_name": "Sara",
+  "version": "1.0.0",
+  "description": "See every appointment, ticket, transfer and callback your Sara AI receptionist handles, live in your browser toolbar.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Sara: live call feed",
+    "default_icon": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" }
+  },
+  "icons": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" },
+  "background": { "service_worker": "background.js" },
+  "permissions": ["storage", "alarms", "notifications"],
+  "host_permissions": ["https://muazajmal212.app.n8n.cloud/*"]
+}

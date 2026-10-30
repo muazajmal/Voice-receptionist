@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sara Dashboard</title>
+<meta name="description" content="Your private Sara dashboard: every appointment, ticket, transfer and callback Sara handled for your business.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#06080f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2306080f'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23f0cd8f'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #06080f; --card: #0e1224; --card-2: #121731; --line: rgba(255,255,255,0.09); --line-strong: rgba(255,255,255,0.18);
+    --gold: #f0cd8f; --gold-deep: #d9a65a; --text: #f4f5fa; --muted: #b0b7c9; --dim: #8189a0;
+    --c-appt: #7fd1ad; --c-ticket: #f0968a; --c-xfer: #b3a8f5; --c-cb: #f0cd8f; --danger: #ef6b6b;
+    --display: 'Archivo', 'Manrope', system-ui, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { font-family: 'Manrope', system-ui, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; line-height: 1.5; min-height: 100vh;
+    background-image: radial-gradient(800px 500px at 90% -10%, rgba(217,166,90,0.13), transparent 70%), radial-gradient(700px 500px at -10% 110%, rgba(108,92,214,0.12), transparent 70%); background-attachment: fixed; }
+  a { color: inherit; }
+  button, input { font: inherit; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  [hidden] { display: none !important; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+
+  /* top bar */
+  .bar { position: sticky; top: 0; z-index: 10; background: rgba(6,8,15,0.82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+  .bar .wrap { display: flex; align-items: center; height: 68px; }
+  .brand { display: flex; align-items: center; font-family: var(--display); font-weight: 800; font-size: 22px; text-decoration: none; }
+  .brand i { width: 11px; height: 11px; border-radius: 50%; background: var(--gold); margin-right: 10px; box-shadow: 0 0 14px var(--gold); }
+  .brand small { font-family: 'Manrope'; font-weight: 600; font-size: 14px; color: var(--dim); margin-left: 10px; }
+  .bar-right { margin-left: auto; display: flex; align-items: center; }
+  .who { font-size: 14px; color: var(--muted); margin-right: 16px; text-align: right; line-height: 1.3; }
+  .who b { display: block; color: var(--text); font-size: 15px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 22px; border-radius: 999px; font-weight: 700; font-size: 15px; cursor: pointer; text-decoration: none;
+    border: 1px solid var(--line-strong); background: rgba(255,255,255,0.05); color: var(--text); transition: border-color .2s ease, color .2s ease, box-shadow .2s ease; }
+  .btn:hover { border-color: var(--gold); color: var(--gold); }
+  .btn.gold { background: linear-gradient(180deg, #f7dcaa, var(--gold-deep)); color: #1d1505; border-color: transparent; box-shadow: 0 10px 34px -12px rgba(217,166,90,0.8); }
+  .btn.gold:hover { color: #1d1505; box-shadow: 0 12px 40px -10px rgba(217,166,90,0.95); }
+  .btn.small { padding: 8px 16px; font-size: 14px; }
+  .btn[disabled] { opacity: .6; cursor: default; }
+
+  /* sign-in */
+  .signin { min-height: calc(100vh - 68px); display: grid; place-items: center; padding: 48px 20px; }
+  .signin-card { width: 100%; max-width: 440px; padding: 38px 34px 32px; border-radius: 28px; background: var(--card); border: 1px solid rgba(240,205,143,0.22); box-shadow: 0 40px 100px -30px rgba(0,0,0,0.85); }
+  .orb { width: 64px; height: 64px; border-radius: 50%; margin-bottom: 22px;
+    background: radial-gradient(circle at 36% 30%, #fff5e2 0%, #f6dba8 14%, var(--gold-deep) 38%, #8a6ee0 72%, #262b62 100%); box-shadow: 0 0 40px rgba(240,205,143,0.35); }
+  .signin h1 { font-family: var(--display); font-weight: 900; font-size: 32px; letter-spacing: -0.02em; line-height: 1.1; }
+  .signin p.lead { color: var(--muted); margin: 10px 0 26px; font-size: 16px; }
+  label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+  .field { width: 100%; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line-strong); background: rgba(255,255,255,0.04); color: var(--text); font-size: 16px; }
+  .field:focus { outline: none; border-color: rgba(240,205,143,0.7); box-shadow: 0 0 0 3px rgba(240,205,143,0.15); }
+  .code-field::selection { background: rgba(240,205,143,0.35); color: var(--text); }
+  .code-field { letter-spacing: 0.5em; font-size: 26px; font-weight: 700; text-align: center; padding: 14px 10px 14px 22px; font-variant-numeric: tabular-nums; }
+  .signin .btn { width: 100%; margin-top: 16px; padding: 15px; }
+  .msg { min-height: 22px; margin-top: 14px; font-size: 14.5px; color: var(--muted); }
+  .msg.error { color: #ff9b9b; }
+  .linkbtn { background: none; border: 0; color: var(--gold); font-weight: 600; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+  .fine { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13.5px; color: var(--dim); }
+
+  /* dashboard */
+  .dash { padding: 34px 0 70px; }
+  .head { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; margin-bottom: 26px; }
+  .head h1 { font-family: var(--display); font-weight: 900; font-size: clamp(30px, 4vw, 42px); letter-spacing: -0.025em; line-height: 1.05; }
+  .head h1 span { color: var(--gold); }
+  .live { display: inline-flex; align-items: center; font-size: 14px; color: var(--muted); margin-top: 10px; }
+  .live::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--c-appt); margin-right: 8px; box-shadow: 0 0 0 0 rgba(127,209,173,0.6); animation: pulse 2s infinite; }
+  .live.stale::before { background: var(--dim); animation: none; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(127,209,173,0.55); } 70% { box-shadow: 0 0 0 9px rgba(127,209,173,0); } 100% { box-shadow: 0 0 0 0 rgba(127,209,173,0); } }
+  .stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-bottom: 26px; }
+  .stat { padding: 20px 20px 18px; border-radius: 20px; background: var(--card); border: 1px solid var(--line); }
+  .stat b { display: block; font-family: var(--display); font-weight: 900; font-size: 36px; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .stat span { display: flex; align-items: center; font-size: 14px; color: var(--muted); margin-top: 6px; }
+  .stat span::before { content: ''; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; background: var(--k, var(--gold)); flex-shrink: 0; }
+  .tools { display: flex; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .chips { display: flex; flex-wrap: wrap; margin-right: auto; }
+  .chip { padding: 9px 16px; margin: 0 8px 8px 0; border-radius: 999px; border: 1px solid var(--line-strong); background: transparent; color: var(--muted); font-weight: 600; font-size: 14px; cursor: pointer; }
+  .chip:hover { color: var(--text); }
+  .chip[aria-pressed="true"] { background: rgba(240,205,143,0.12); color: var(--gold); border-color: rgba(240,205,143,0.5); }
+  .chip em { font-style: normal; opacity: .7; margin-left: 4px; font-variant-numeric: tabular-nums; }
+  .search { width: 260px; max-width: 100%; margin-bottom: 8px; padding: 10px 14px; font-size: 15px; }
+  .feed { list-style: none; border-radius: 22px; background: var(--card); border: 1px solid var(--line); overflow: hidden; }
+  .item { display: flex; align-items: flex-start; padding: 18px 22px; border-top: 1px solid var(--line); }
+  .item:first-child { border-top: 0; }
+  .item.new { animation: flash 2.4s ease; }
+  @keyframes flash { 0% { background: rgba(240,205,143,0.14); } 100% { background: transparent; } }
+  .ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; margin-right: 16px; background: color-mix(in srgb, var(--k) 16%, transparent); color: var(--k); }
+  .ic svg { width: 20px; height: 20px; }
+  .body { flex: 1 1 auto; min-width: 0; }
+  .row1 { display: flex; align-items: baseline; flex-wrap: wrap; }
+  .row1 b { font-size: 16px; margin-right: 10px; }
+  .kind { font-size: 13px; font-weight: 700; color: var(--k); text-transform: uppercase; letter-spacing: 0.06em; }
+  .detail { color: #d6dae5; font-size: 15px; margin-top: 3px; overflow-wrap: anywhere; }
+  .meta { display: flex; flex-wrap: wrap; font-size: 13.5px; color: var(--dim); margin-top: 6px; }
+  .meta > * { margin-right: 14px; }
+  .meta a { color: var(--muted); text-decoration: none; }
+  .meta a:hover { color: var(--gold); }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 700; text-transform: capitalize; border: 1px solid var(--line-strong); color: var(--muted); }
+  .pill.good { color: var(--c-appt); border-color: rgba(127,209,173,0.4); }
+  .pill.warn { color: var(--gold); border-color: rgba(240,205,143,0.4); }
+  .pill.bad { color: #ff9b9b; border-color: rgba(239,107,107,0.4); }
+  .ago { margin-left: 16px; font-size: 13.5px; color: var(--dim); white-space: nowrap; }
+  .empty { padding: 48px 24px; text-align: center; color: var(--muted); }
+  .more { display: block; margin: 16px auto 0; }
+  .ext { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 26px; padding: 22px 24px; border-radius: 22px; background: linear-gradient(120deg, rgba(240,205,143,0.1), rgba(108,92,214,0.08)); border: 1px solid rgba(240,205,143,0.25); }
+  .ext b { font-size: 17px; display: block; }
+  .ext p { color: var(--muted); font-size: 15px; margin-right: 18px; }
+  .loading { padding: 60px 24px; text-align: center; color: var(--muted); }
+  .skel { height: 14px; border-radius: 7px; background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.1), rgba(255,255,255,0.05)); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  @media (max-width: 900px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .stats .stat:first-child { grid-column: 1 / -1; } }
+  @media (max-width: 640px) {
+    .wrap { padding: 0 16px; }
+    .who { display: none; }
+    .brand small { display: none; }
+    .item { padding: 16px; }
+    .ic { margin-right: 12px; }
+    .ago { display: none; }
+    .search { width: 100%; }
+    .signin-card { padding: 30px 22px 26px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="./"><i></i>Sara<small>Dashboard</small></a>
+    <div class="bar-right" id="bar-signed" hidden>
+      <div class="who"><b id="who-business"></b><span id="who-email"></span></div>
+      <button class="btn small" id="signout" type="button">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- sign in -->
+  <section class="signin" id="signin" hidden>
+    <div class="signin-card">
+      <div class="orb" aria-hidden="true"></div>
+      <h1 id="si-title">Sign in to your dashboard</h1>
+      <p class="lead" id="si-lead">Enter the email you signed up with. We'll send you a 6-digit code.</p>
+      <form id="form-email" novalidate>
+        <label for="si-email">Email</label>
+        <input class="field" id="si-email" type="email" autocomplete="email" inputmode="email" required placeholder="you@business.com">
+        <button class="btn gold" type="submit">Email me a code</button>
+      </form>
+      <form id="form-code" novalidate hidden>
+        <label for="si-code">6-digit code</label>
+        <input class="field code-field" id="si-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required placeholder="••••••">
+        <button class="btn gold" type="submit">Sign in</button>
+        <p class="msg" style="margin-top:14px"><button class="linkbtn" type="button" id="si-back">Use a different email</button> · <button class="linkbtn" type="button" id="si-resend">Send a new code</button></p>
+      </form>
+      <p class="msg" id="si-msg" role="status" aria-live="polite"></p>
+      <p class="fine">Only businesses using Sara can sign in. Not a customer yet? <a href="./#signup">Get Sara</a>.</p>
+    </div>
+  </section>
+
+  <!-- dashboard -->
+  <section class="dash" id="dash" hidden>
+    <div class="wrap">
+      <div class="head">
+        <div>
+          <h1 id="greet">Your calls, <span>handled.</span></h1>
+          <p class="live" id="live" aria-live="polite">Loading your activity…</p>
+        </div>
+        <button class="btn small" id="refresh" type="button" style="margin-top:14px">Refresh</button>
+      </div>
+
+      <div class="stats" id="stats">
+        <div class="stat" style="--k: var(--c-appt)"><b id="s-upcoming">–</b><span>Upcoming appointments</span></div>
+        <div class="stat" style="--k: var(--c-appt)"><b id="s-appts">–</b><span>Appointments booked</span></div>
+        <div class="stat" style="--k: var(--c-ticket)"><b id="s-tickets">–</b><span>Open tickets</span></div>
+        <div class="stat" style="--k: var(--c-xfer)"><b id="s-xfers">–</b><span>Transfers</span></div>
+        <div class="stat" style="--k: var(--c-cb)"><b id="s-cbs">–</b><span>Callbacks waiting</span></div>
+      </div>
+
+      <div class="tools">
+        <div class="chips" role="group" aria-label="Filter activity">
+          <button class="chip" type="button" data-f="all" aria-pressed="true">All<em id="c-all"></em></button>
+          <button class="chip" type="button" data-f="appointment" aria-pressed="false">Appointments<em id="c-appointment"></em></button>
+          <button class="chip" type="button" data-f="ticket" aria-pressed="false">Tickets<em id="c-ticket"></em></button>
+          <button class="chip" type="button" data-f="transfer" aria-pressed="false">Transfers<em id="c-transfer"></em></button>
+          <button class="chip" type="button" data-f="callback" aria-pressed="false">Callbacks<em id="c-callback"></em></button>
+        </div>
+        <label class="sr-only" for="search">Search activity</label>
+        <input class="field search" id="search" type="search" placeholder="Search name, phone or note">
+      </div>
+
+      <ul class="feed" id="feed" aria-live="off">
+        <li class="loading"><div class="skel" style="width:60%;margin:0 auto 12px"></div><div class="skel" style="width:40%;margin:0 auto"></div></li>
+      </ul>
+      <button class="btn small more" id="more" type="button" hidden>Show more</button>
+
+      <div class="ext">
+        <div><b>Get the live feed in your browser toolbar</b><p>The Sara Chrome extension shows new calls the moment they happen.</p></div>
+        <a class="btn gold small" href="extension.html" style="margin-top:8px">Get the extension</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  var API = 'https://muazajmal212.app.n8n.cloud/webhook/sara-portal';
+  var REFRESH_MS = 30000;
+  var $ = function (id) { return document.getElementById(id); };
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  var token = store('sara-portal-token');
+  var email = store('sara-portal-email') || '';
+  var data = null, filter = 'all', query = '', shown = 40, timer = 0, lastOk = 0, known = {}, firstLoad = true;
+
+  function post(body) {
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var t = ctrl ? setTimeout(function () { ctrl.abort(); }, 30000) : 0;
+    return fetch(API, { method: 'POST', body: new URLSearchParams(body), signal: ctrl ? ctrl.signal : undefined })
+      .then(function (r) { clearTimeout(t); return r.json().catch(function () { return {}; }).then(function (j) { j._status = r.status; return j; }); });
+  }
+
+  // ---------- sign in ----------
+  function siMsg(text, err) { var m = $('si-msg'); m.textContent = text || ''; m.className = 'msg' + (err ? ' error' : ''); }
+  function showSignin() {
+    clearInterval(timer);
+    $('dash').hidden = true; $('bar-signed').hidden = true; $('signin').hidden = false;
+    $('form-email').hidden = false; $('form-code').hidden = true;
+    $('si-title').textContent = 'Sign in to your dashboard';
+    $('si-lead').textContent = "Enter the email you signed up with. We'll send you a 6-digit code.";
+    $('si-email').value = email; siMsg('');
+    setTimeout(function () { $('si-email').focus(); }, 30);
+  }
+  function requestCode(btn) {
+    var e = $('si-email').value.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) { siMsg('Please enter a valid email address.', true); $('si-email').focus(); return; }
+    email = e; store('sara-portal-email', e);
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+    siMsg('');
+    post({ action: 'request_code', email: e }).then(function (j) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Email me a code'; }
+      if (j._status === 429) { siMsg('Too many tries. Please wait a few minutes and try again.', true); return; }
+      if (!j.ok) { siMsg("That didn't work. Check the email and try again.", true); return; }
+      $('form-email').hidden = true; $('form-code').hidden = false;
+      $('si-title').textContent = 'Check your email';
+      $('si-lead').textContent = 'If ' + e + ' has a Sara account, a 6-digit code is on its way. It expires in 10 minutes.';
+      $('si-code').value = ''; siMsg('');
+      setTimeout(function () { $('si-code').focus(); }, 30);
+    }).catch(function () {
+      if (btn) { btn.disabled = false; btn.textContent = 'Email me a code'; }
+      siMsg("Couldn't reach the server. Check your connection and try again.", true);
+    });
+  }
+  $('form-email').addEventListener('submit', function (ev) { ev.preventDefault(); requestCode(ev.target.querySelector('button')); });
+  $('si-back').addEventListener('click', showSignin);
+  $('si-resend').addEventListener('click', function () { $('si-email').value = email; requestCode(null); siMsg('A new code is on its way.'); });
+  $('si-code').addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 6);
+    if (this.value.length === 6) $('form-code').requestSubmit ? $('form-code').requestSubmit() : null;
+  });
+  $('form-code').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var code = $('si-code').value.replace(/\D/g, '');
+    if (code.length !== 6) { siMsg('Enter the 6 digits from the email.', true); return; }
+    var btn = ev.target.querySelector('button[type=submit]');
+    btn.disabled = true; btn.textContent = 'Signing in…'; siMsg('');
+    post({ action: 'verify', email: email, code: code }).then(function (j) {
+      btn.disabled = false; btn.textContent = 'Sign in';
+      if (j.ok && j.token) { token = j.token; store('sara-portal-token', token); startDashboard(j.business); return; }
+      var err = j.error === 'wrong_code' ? "That code isn't right. Check the email and try again."
+        : j.error === 'too_many' ? 'Too many wrong tries. Please ask for a new code.'
+        : 'That code has expired. Please ask for a new one.';
+      siMsg(err, true); $('si-code').select();
+    }).catch(function () { btn.disabled = false; btn.textContent = 'Sign in'; siMsg("Couldn't reach the server. Please try again.", true); });
+  });
+  $('signout').addEventListener('click', function () {
+    if (token) post({ action: 'sign_out', token: token }).catch(function () {});
+    token = null; store('sara-portal-token', null); data = null; known = {}; firstLoad = true;
+    showSignin();
+  });
+
+  // ---------- dashboard ----------
+  var ICONS = {
+    appointment: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M9 15l2 2 4-4"/></svg>',
+    ticket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>',
+    transfer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l4 4-4 4M21 7H9M7 21l-4-4 4-4M3 17h12"/></svg>',
+    callback: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/><path d="M15 3v5h5M21 2l-6 6"/></svg>'
+  };
+  var KIND = { appointment: ['Appointment', 'var(--c-appt)'], ticket: ['Ticket', 'var(--c-ticket)'], transfer: ['Transfer', 'var(--c-xfer)'], callback: ['Callback', 'var(--c-cb)'] };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function ago(iso) {
+    var t = Date.parse(iso); if (isNaN(t)) return '';
+    var s = Math.max(0, (Date.now() - t) / 1000);
+    if (s < 60) return 'just now';
+    if (s < 3600) return Math.floor(s / 60) + ' min ago';
+    if (s < 86400) return Math.floor(s / 3600) + ' h ago';
+    if (s < 86400 * 30) return Math.floor(s / 86400) + ' d ago';
+    return new Date(t).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  function pillClass(st) {
+    if (/^(booked|confirmed|resolved|completed|done|called)$/.test(st)) return 'good';
+    if (/^(cancelled|canceled|escalated)$/.test(st)) return 'bad';
+    return 'warn';
+  }
+  function telLink(p) { var d = String(p || '').replace(/[^\d+]/g, ''); return d.replace(/\D/g, '').length >= 7 ? '<a href="tel:' + esc(d) + '">' + esc(p) + '</a>' : (p ? '<span>' + esc(p) + '</span>' : ''); }
+  function itemHtml(a, isNew) {
+    var k = KIND[a.type] || ['Activity', 'var(--gold)'];
+    var meta = [];
+    if (a.type === 'appointment' && a.when_text) meta.push('<span>For ' + esc(a.when_text) + '</span>');
+    if (a.type === 'callback' && a.when_text) meta.push('<span>Call back: ' + esc(a.when_text) + '</span>');
+    if (a.type === 'transfer' && a.department) meta.push('<span>To ' + esc(a.department) + '</span>');
+    if (a.type === 'ticket' && a.priority) meta.push('<span>' + esc(a.priority.charAt(0).toUpperCase() + a.priority.slice(1)) + ' priority</span>');
+    var tl = telLink(a.phone); if (tl) meta.push(tl);
+    if (a.status) meta.push('<span class="pill ' + pillClass(a.status) + '">' + esc(a.status.replace(/_/g, ' ')) + '</span>');
+    return '<li class="item' + (isNew ? ' new' : '') + '" style="--k:' + k[1] + '">' +
+      '<span class="ic" aria-hidden="true">' + (ICONS[a.type] || '') + '</span>' +
+      '<div class="body"><div class="row1"><b>' + esc(a.name || 'Unknown caller') + '</b><span class="kind">' + k[0] + '</span></div>' +
+      '<p class="detail">' + esc(a.detail) + '</p><div class="meta">' + meta.join('') + '</div></div>' +
+      '<time class="ago" datetime="' + esc(a.at) + '" title="' + esc(new Date(a.at).toLocaleString()) + '">' + ago(a.at) + '</time></li>';
+  }
+  function key(a) { return a.type + '|' + a.id + '|' + a.at; }
+  function render() {
+    if (!data) return;
+    var s = data.stats || {};
+    $('s-upcoming').textContent = s.upcoming || 0; $('s-appts').textContent = s.appointments || 0;
+    $('s-tickets').textContent = s.open_tickets || 0; $('s-xfers').textContent = s.transfers || 0; $('s-cbs').textContent = s.pending_callbacks || 0;
+    var all = data.activity || [];
+    var counts = { all: all.length, appointment: 0, ticket: 0, transfer: 0, callback: 0 };
+    all.forEach(function (a) { counts[a.type] = (counts[a.type] || 0) + 1; });
+    Object.keys(counts).forEach(function (k) { var el = $('c-' + k); if (el) el.textContent = counts[k]; });
+    var q = query.toLowerCase();
+    var list = all.filter(function (a) {
+      if (filter !== 'all' && a.type !== filter) return false;
+      if (!q) return true;
+      return [a.name, a.phone, a.detail, a.when_text, a.status, a.department].join(' ').toLowerCase().indexOf(q) >= 0;
+    });
+    var feed = $('feed');
+    if (!list.length) {
+      feed.innerHTML = '<li class="empty">' + (all.length ? 'Nothing matches that filter.' : "No calls yet. As soon as Sara handles a call, it shows up here.") + '</li>';
+      $('more').hidden = true; return;
+    }
+    feed.innerHTML = list.slice(0, shown).map(function (a) { return itemHtml(a, !firstLoad && !known[key(a)]); }).join('');
+    $('more').hidden = list.length <= shown;
+  }
+  function liveText() {
+    var el = $('live');
+    if (!lastOk) return;
+    var s = Math.round((Date.now() - lastOk) / 1000);
+    el.className = 'live' + (s > 95 ? ' stale' : '');
+    el.textContent = 'Live · updated ' + (s < 5 ? 'just now' : s < 60 ? s + 's ago' : Math.floor(s / 60) + ' min ago') + ' · refreshes every 30 seconds';
+  }
+  function load(manual) {
+    if (!token) return showSignin();
+    if (manual) { $('refresh').disabled = true; $('refresh').textContent = 'Refreshing…'; }
+    return post({ action: 'data', token: token }).then(function (j) {
+      $('refresh').disabled = false; $('refresh').textContent = 'Refresh';
+      if (j._status === 401) { token = null; store('sara-portal-token', null); showSignin(); siMsg('Your session ended. Please sign in again.'); return; }
+      if (!j.ok) throw new Error('bad');
+      var prev = known; known = {};
+      (j.activity || []).forEach(function (a) { known[key(a)] = true; });
+      var keepKnown = known; known = prev; data = j; render(); known = keepKnown; firstLoad = false;
+      lastOk = Date.now(); liveText();
+      $('who-business').textContent = j.business || ''; $('who-email').textContent = j.email || email;
+      $('greet').innerHTML = esc(j.business || 'Your business') + ', <span>handled.</span>';
+      document.title = (j.business ? j.business + ' · ' : '') + 'Sara Dashboard';
+    }).catch(function () {
+      $('refresh').disabled = false; $('refresh').textContent = 'Refresh';
+      var el = $('live'); el.className = 'live stale';
+      el.textContent = lastOk ? "Can't reach Sara right now. Showing the last update; retrying in 30 seconds." : "Can't reach Sara right now. Retrying in 30 seconds.";
+      if (!data) $('feed').innerHTML = '<li class="empty">Couldn\'t load your activity yet. It will retry automatically.</li>';
+    });
+  }
+  function startDashboard(business) {
+    $('signin').hidden = true; $('dash').hidden = false; $('bar-signed').hidden = false;
+    if (business) $('who-business').textContent = business;
+    $('who-email').textContent = email;
+    load();
+    clearInterval(timer);
+    timer = setInterval(function () { if (!document.hidden) load(); liveText(); }, REFRESH_MS);
+  }
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && token && Date.now() - lastOk > REFRESH_MS) load(); });
+  setInterval(liveText, 5000);
+  $('refresh').addEventListener('click', function () { load(true); });
+  $('more').addEventListener('click', function () { shown += 40; render(); });
+  $('search').addEventListener('input', function () { query = this.value.trim(); shown = 40; render(); });
+  document.querySelectorAll('.chip').forEach(function (c) {
+    c.addEventListener('click', function () {
+      filter = c.getAttribute('data-f'); shown = 40;
+      document.querySelectorAll('.chip').forEach(function (o) { o.setAttribute('aria-pressed', o === c ? 'true' : 'false'); });
+      render();
+    });
+  });
+
+  if (token) startDashboard(); else showSignin();
+})();
+</script>
+</body>
+</html>
