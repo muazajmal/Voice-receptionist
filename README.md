@@ -12,6 +12,6 @@ Sara answers business phone calls 24/7. She books appointments, opens support ti
 Retell AI · n8n (webhooks and REST APIs) · Google Gemini · Google Sheets API · Gmail API · WhatsApp Business Cloud API · Next.js, React and Tailwind CSS (dashboard) · JavaScript with the Web Speech and Web Audio APIs (this website) · Vercel
 
 ## Author
-**Muhammad Muaz Ajmal**, AI Engineer (AI agents, voice AI and workflow automation)
+**Muaz Ajmal**, AI Engineer (AI agents, voice AI and workflow automation)
 - LinkedIn: https://www.linkedin.com/in/muaz-ajmal-54318b419
 - Profile: https://voice-receptionist-puce.vercel.app/muaz-ajmal.html
