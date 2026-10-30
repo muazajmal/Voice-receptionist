@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Sara: Live Call Feed",
   "short_name": "Sara",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "See every appointment, ticket, transfer and callback your Sara AI receptionist handles, live in your browser toolbar.",
   "action": {
     "default_popup": "popup.html",

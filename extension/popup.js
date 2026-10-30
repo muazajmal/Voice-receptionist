@@ -84,12 +84,47 @@
       var k = KIND[a.type] || ['Activity', '#f0cd8f'];
       var isNew = lastSeen.length && lastSeen.indexOf(saraKey(a)) < 0;
       var when = a.type === 'appointment' && a.when_text ? 'For ' + a.when_text : a.type === 'callback' && a.when_text ? 'Call back: ' + a.when_text : '';
-      return '<li class="item' + (isNew ? ' new' : '') + '" style="--k:' + k[1] + '"><span class="dot"></span><div class="body">' +
+      var act = actionFor(a);
+      var btn = act ? '<button class="act' + (act.undo ? ' undo' : '') + '" type="button" data-type="' + a.type + '" data-row="' + a.row + '" data-status="' + act.status + '">' + act.label + '</button>' : '';
+      return '<li class="item' + (isNew ? ' new' : '') + (act && act.undo ? ' done' : '') + '" style="--k:' + k[1] + '"><span class="dot"></span><div class="body">' +
         '<div class="row1"><b>' + esc(a.name || 'Unknown caller') + '</b><time>' + ago(a.at) + '</time></div>' +
         '<span class="kind">' + k[0] + (a.status ? ' · ' + esc(a.status) : '') + '</span>' +
-        '<p class="detail">' + esc(a.detail) + '</p>' + (when ? '<p class="when">' + esc(when) + '</p>' : '') + '</div></li>';
+        '<p class="detail">' + esc(a.detail) + '</p>' + (when ? '<p class="when">' + esc(when) + '</p>' : '') + btn + '</div></li>';
     }).join('');
   }
+
+  // ---------- mark done ----------
+  var ACTIONS = {
+    appointment: { done: 'completed', open: 'booked', label: 'Mark completed', from: ['booked', 'confirmed', ''] },
+    ticket: { done: 'resolved', open: 'open', label: 'Mark resolved' },
+    transfer: { done: 'done', open: 'pending', label: 'Mark handled' },
+    callback: { done: 'done', open: 'pending', label: 'Mark called back' }
+  };
+  function actionFor(a) {
+    var c = ACTIONS[a.type];
+    if (!c || !(a.row >= 2)) return null;
+    var st = String(a.status || '').toLowerCase();
+    if (st === c.done) return { status: c.open, label: 'Reopen', undo: true };
+    if (c.from && c.from.indexOf(st) < 0) return null;
+    return { status: c.done, label: c.label };
+  }
+  $('feed').addEventListener('click', function (ev) {
+    var b = ev.target.closest('.act');
+    if (!b || b.disabled) return;
+    b.disabled = true; b.textContent = 'Saving…';
+    chrome.storage.local.get(['token'], function (st) {
+      if (!st.token) { showSignin(); return; }
+      saraPost({ action: 'set_status', token: st.token, type: b.getAttribute('data-type'), row: parseInt(b.getAttribute('data-row'), 10), status: b.getAttribute('data-status') }).then(function (j) {
+        if (j._status === 401) { chrome.storage.local.remove(['token', 'data']); showSignin('Your session ended. Please sign in again.'); return; }
+        if (!j.ok) throw new Error('bad');
+        showFeed(j); setStatus(Date.now());
+        chrome.storage.local.set({ data: j, checked_at: Date.now() });
+      }).catch(function () {
+        b.disabled = false; b.textContent = 'Try again';
+        $('status').textContent = "Couldn't save that change"; $('status').className = '';
+      });
+    });
+  });
   function setStatus(ts) {
     var el = $('status');
     if (!ts) { el.textContent = 'Live call feed'; el.className = ''; return; }
