@@ -105,6 +105,20 @@
   .pill.warn { color: var(--gold); border-color: rgba(240,205,143,0.4); }
   .pill.bad { color: #ff9b9b; border-color: rgba(239,107,107,0.4); }
   .ago { margin-left: 16px; font-size: 13.5px; color: var(--dim); white-space: nowrap; }
+  .side { display: flex; flex-direction: column; align-items: flex-end; margin-left: 16px; flex-shrink: 0; }
+  .side .ago { margin-left: 0; }
+  .act { margin-top: 10px; padding: 7px 14px; border-radius: 999px; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; white-space: nowrap;
+    color: var(--k); background: color-mix(in srgb, var(--k) 12%, transparent); border: 1px solid color-mix(in srgb, var(--k) 45%, transparent); transition: background .2s ease; }
+  .act:hover { background: color-mix(in srgb, var(--k) 22%, transparent); }
+  .act.undo { color: var(--dim); background: none; border-color: var(--line-strong); font-weight: 600; }
+  .act.undo:hover { color: var(--text); }
+  .act[disabled] { opacity: .6; cursor: default; }
+  .item.done .detail, .item.done .row1 b { color: var(--muted); }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; display: flex; align-items: center; padding: 12px 14px 12px 20px; border-radius: 999px;
+    background: #1a2038; border: 1px solid var(--line-strong); box-shadow: 0 20px 50px -15px rgba(0,0,0,0.8); font-size: 15px; transition: opacity .25s ease, transform .25s ease; z-index: 50; max-width: calc(100vw - 32px); }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+  .toast.err { border-color: rgba(239,107,107,0.5); }
+  .toast button { margin-left: 14px; background: none; border: 0; color: var(--gold); font: inherit; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
   .empty { padding: 48px 24px; text-align: center; color: var(--muted); }
   .more { display: block; margin: 16px auto 0; }
   .ext { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 26px; padding: 22px 24px; border-radius: 22px; background: linear-gradient(120deg, rgba(240,205,143,0.1), rgba(108,92,214,0.08)); border: 1px solid rgba(240,205,143,0.25); }
@@ -122,6 +136,10 @@
     .item { padding: 16px; }
     .ic { margin-right: 12px; }
     .ago { display: none; }
+    .item { flex-wrap: wrap; }
+    .item .body { flex: 1 1 0; }
+    .side { flex-basis: 100%; align-items: flex-start; margin-left: 52px; }
+    .side:empty, .side:not(:has(.act)) { display: none; }
     .search { width: 100%; }
     .signin-card { padding: 30px 22px 26px; }
   }
@@ -197,6 +215,7 @@
         <li class="loading"><div class="skel" style="width:60%;margin:0 auto 12px"></div><div class="skel" style="width:40%;margin:0 auto"></div></li>
       </ul>
       <button class="btn small more" id="more" type="button" hidden>Show more</button>
+      <div class="toast" id="toast" role="status" aria-live="polite"><span id="toast-text"></span><button type="button" id="toast-undo" hidden>Undo</button></div>
 
       <div class="ext">
         <div><b>Get the live feed in your browser toolbar</b><p>The Sara Chrome extension shows new calls the moment they happen.</p></div>
@@ -316,12 +335,58 @@
     if (a.type === 'ticket' && a.priority) meta.push('<span>' + esc(a.priority.charAt(0).toUpperCase() + a.priority.slice(1)) + ' priority</span>');
     var tl = telLink(a.phone); if (tl) meta.push(tl);
     if (a.status) meta.push('<span class="pill ' + pillClass(a.status) + '">' + esc(a.status.replace(/_/g, ' ')) + '</span>');
-    return '<li class="item' + (isNew ? ' new' : '') + '" style="--k:' + k[1] + '">' +
+    var act = actionFor(a), btn = '';
+    if (act) btn = '<button class="act' + (act.undo ? ' undo' : '') + '" type="button" data-type="' + a.type + '" data-row="' + a.row + '" data-status="' + act.status + '" data-was="' + esc(a.status || '') + '">' + act.label + '</button>';
+    return '<li class="item' + (isNew ? ' new' : '') + (act && act.undo ? ' done' : '') + '" style="--k:' + k[1] + '">' +
       '<span class="ic" aria-hidden="true">' + (ICONS[a.type] || '') + '</span>' +
       '<div class="body"><div class="row1"><b>' + esc(a.name || 'Unknown caller') + '</b><span class="kind">' + k[0] + '</span></div>' +
       '<p class="detail">' + esc(a.detail) + '</p><div class="meta">' + meta.join('') + '</div></div>' +
-      '<time class="ago" datetime="' + esc(a.at) + '" title="' + esc(new Date(a.at).toLocaleString()) + '">' + ago(a.at) + '</time></li>';
+      '<div class="side"><time class="ago" datetime="' + esc(a.at) + '" title="' + esc(new Date(a.at).toLocaleString()) + '">' + ago(a.at) + '</time>' + btn + '</div></li>';
   }
+  // What each kind of item can be marked as, and how to undo it.
+  var ACTIONS = {
+    appointment: { done: 'completed', open: 'booked', label: 'Mark completed', toast: 'Appointment marked completed', from: ['booked', 'confirmed', ''] },
+    ticket: { done: 'resolved', open: 'open', label: 'Mark resolved', toast: 'Ticket marked resolved' },
+    transfer: { done: 'done', open: 'pending', label: 'Mark handled', toast: 'Transfer marked handled' },
+    callback: { done: 'done', open: 'pending', label: 'Mark called back', toast: 'Marked as called back' }
+  };
+  function actionFor(a) {
+    var c = ACTIONS[a.type];
+    if (!c || !(a.row >= 2)) return null;
+    var st = String(a.status || '').toLowerCase();
+    if (st === c.done) return { status: c.open, label: 'Reopen', undo: true };
+    if (c.from && c.from.indexOf(st) < 0) return null;   // e.g. a cancelled appointment
+    return { status: c.done, label: c.label };
+  }
+  var toastTimer = 0, undoFn = null;
+  function toast(text, isErr, undo) {
+    $('toast-text').textContent = text;
+    $('toast').className = 'toast show' + (isErr ? ' err' : '');
+    undoFn = undo || null; $('toast-undo').hidden = !undo;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { $('toast').className = 'toast'; undoFn = null; }, undo ? 7000 : 4500);
+  }
+  function setStatus(type, row, status, was, btn) {
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+    return post({ action: 'set_status', token: token, type: type, row: row, status: status }).then(function (j) {
+      if (j._status === 401) { token = null; store('sara-portal-token', null); showSignin(); siMsg('Your session ended. Please sign in again.'); return; }
+      if (!j.ok) throw new Error('bad');
+      known = {}; (j.activity || []).forEach(function (a) { known[key(a)] = true; });
+      data = j; render(); lastOk = Date.now(); liveText();
+      var c = ACTIONS[type];
+      if (status === c.done) toast(c.toast, false, function () { setStatus(type, row, c.open, status); });
+      else toast('Reopened');
+    }).catch(function () {
+      if (btn) { btn.disabled = false; render(); }
+      toast("Couldn't save that change. Please try again.", true);
+    });
+  }
+  $('feed').addEventListener('click', function (ev) {
+    var b = ev.target.closest('.act');
+    if (!b || b.disabled) return;
+    setStatus(b.getAttribute('data-type'), parseInt(b.getAttribute('data-row'), 10), b.getAttribute('data-status'), b.getAttribute('data-was'), b);
+  });
+  $('toast-undo').addEventListener('click', function () { var f = undoFn; $('toast').className = 'toast'; undoFn = null; if (f) f(); });
   function key(a) { return a.type + '|' + a.id + '|' + a.at; }
   function render() {
     if (!data) return;
