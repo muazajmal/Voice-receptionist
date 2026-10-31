@@ -1651,7 +1651,7 @@
       btn.disabled = true; btn.textContent = 'Sending...';
       var data = new URLSearchParams(new FormData(form));
       fetch(ENDPOINT, { method: 'POST', body: data })
-        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || !j.ok) throw new Error('bad'); return j; }); })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || !j.ok) { var er = new Error('bad'); er.status = r.status; throw er; } return j; }); })
         .then(function () {
           var name = (form.querySelector('[name="full_name"]') || {}).value || '';
           var slot = card.querySelector('.done-name');
@@ -1659,8 +1659,9 @@
           card.classList.add('sent');
           card.querySelector('.form-done').focus();
         })
-        .catch(function () {
+        .catch(function (err) {
           btn.disabled = false; btn.textContent = label;
+          if (err && err.status === 429) { showError('We\'ve received several forms from you already. Please wait a little while, or email us at <a href="mailto:' + FALLBACK + '">' + FALLBACK + '</a>.'); return; }
           showError('That didn\'t go through. Please try again, or email us at <a href="mailto:' + FALLBACK + '">' + FALLBACK + '</a>.');
         });
     });
