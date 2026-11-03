@@ -23,7 +23,7 @@
   body { font-family: 'Manrope', system-ui, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; line-height: 1.5; min-height: 100vh;
     background-image: radial-gradient(800px 500px at 90% -10%, rgba(217,166,90,0.13), transparent 70%), radial-gradient(700px 500px at -10% 110%, rgba(108,92,214,0.12), transparent 70%); background-attachment: fixed; }
   a { color: inherit; }
-  button, input { font: inherit; }
+  button, input, select, textarea { font: inherit; }
   .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
   [hidden] { display: none !important; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
@@ -128,6 +128,18 @@
   .skel { height: 14px; border-radius: 7px; background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.1), rgba(255,255,255,0.05)); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
   @keyframes shimmer { to { background-position: -200% 0; } }
 
+  .head-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  .warn { padding: 14px 16px; border-radius: 14px; background: rgba(239,107,107,0.08); border: 1px solid rgba(239,107,107,0.35); color: #ffc4c4; font-size: 14.5px; margin-bottom: 20px; }
+  .set-page { padding-bottom: 120px; }
+  .set-page .back { margin-bottom: 18px; }
+  .head p.sub { color: var(--muted); margin-top: 8px; max-width: 620px; }
+  .savebar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: rgba(9,12,22,0.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line-strong); }
+  .savebar .wrap { display: flex; align-items: center; gap: 16px; min-height: 72px; padding-top: 10px; padding-bottom: 10px; }
+  .savebar p { flex: 1 1 auto; font-size: 14.5px; color: var(--muted); }
+  .savebar p.error { color: #ff9b9b; }
+  .savebar p.ok { color: var(--c-appt); }
+  select.field option { background: #0e1224; }
+  @media (max-width: 640px) { .savebar .wrap { flex-wrap: wrap; gap: 8px; } .savebar .btn { width: 100%; } }
   @media (max-width: 900px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .stats .stat:first-child { grid-column: 1 / -1; } }
   @media (max-width: 640px) {
     .wrap { padding: 0 16px; }
@@ -188,7 +200,10 @@
           <h1 id="greet">Your calls, <span>handled.</span></h1>
           <p class="live" id="live" aria-live="polite">Loading your activity…</p>
         </div>
-        <button class="btn small" id="refresh" type="button" style="margin-top:14px">Refresh</button>
+        <div class="head-btns">
+          <button class="btn small" id="open-settings" type="button">Business settings</button>
+          <button class="btn small" id="refresh" type="button">Refresh</button>
+        </div>
       </div>
 
       <div class="stats" id="stats">
@@ -223,8 +238,27 @@
       </div>
     </div>
   </section>
-</main>
 
+  <!-- business settings -->
+  <section class="dash set-page" id="settings-view" hidden>
+    <div class="wrap">
+      <button class="btn small back" id="set-back" type="button">← Back to activity</button>
+      <div class="head"><div><h1>Business <span>settings</span></h1>
+        <p class="sub">Your hours, holidays, answers and details. Sara uses them on every call, so keep them current.</p></div></div>
+      <div class="loading" id="set-loading">Loading your settings…</div>
+      <div class="warn" id="set-warn" hidden></div>
+      <div id="set-body"></div>
+    </div>
+  </section>
+</main>
+<div class="savebar" id="set-bar" hidden>
+  <div class="wrap">
+    <p id="set-msg" role="status" aria-live="polite">Changes go live on Sara's next call after you save.</p>
+    <button class="btn gold" id="set-save" type="button">Save changes</button>
+  </div>
+</div>
+
+<script src="settings-editor.js"></script>
 <script>
 (function () {
   var API = 'https://muazajmal212.app.n8n.cloud/webhook/sara-portal';
@@ -236,9 +270,9 @@
   var email = store('sara-portal-email') || '';
   var data = null, filter = 'all', query = '', shown = 40, timer = 0, lastOk = 0, known = {}, firstLoad = true;
 
-  function post(body) {
+  function post(body, ms) {
     var ctrl = window.AbortController ? new AbortController() : null;
-    var t = ctrl ? setTimeout(function () { ctrl.abort(); }, 30000) : 0;
+    var t = ctrl ? setTimeout(function () { ctrl.abort(); }, ms || 30000) : 0;
     return fetch(API, { method: 'POST', body: new URLSearchParams(body), signal: ctrl ? ctrl.signal : undefined })
       .then(function (r) { clearTimeout(t); return r.json().catch(function () { return {}; }).then(function (j) { j._status = r.status; return j; }); });
   }
@@ -247,7 +281,7 @@
   function siMsg(text, err) { var m = $('si-msg'); m.textContent = text || ''; m.className = 'msg' + (err ? ' error' : ''); }
   function showSignin() {
     clearInterval(timer);
-    $('dash').hidden = true; $('bar-signed').hidden = true; $('signin').hidden = false;
+    $('dash').hidden = true; $('settings-view').hidden = true; $('set-bar').hidden = true; setDirty = false; $('bar-signed').hidden = true; $('signin').hidden = false;
     $('form-email').hidden = false; $('form-code').hidden = true;
     $('si-title').textContent = 'Sign in to your dashboard';
     $('si-lead').textContent = "Enter the email you signed up with. We'll send you a 6-digit code.";
@@ -457,6 +491,51 @@
       filter = c.getAttribute('data-f'); shown = 40;
       document.querySelectorAll('.chip').forEach(function (o) { o.setAttribute('aria-pressed', o === c ? 'true' : 'false'); });
       render();
+    });
+  });
+
+  // ---------- business settings ----------
+  var setDirty = false, setSaving = false;
+  function setMsg(text, cls) { var m = $('set-msg'); m.textContent = text; m.className = cls || ''; }
+  function leaveOk() { return !setDirty || window.confirm('You have unsaved changes. Leave without saving?'); }
+  function openSettings() {
+    $('dash').hidden = true; $('settings-view').hidden = false; $('set-bar').hidden = false; window.scrollTo(0, 0);
+    setDirty = false; $('set-save').disabled = true; $('set-warn').hidden = true; $('set-body').innerHTML = '';
+    $('set-loading').hidden = false; $('set-loading').textContent = 'Loading your settings…';
+    setMsg("Changes go live on Sara's next call after you save.");
+    post({ action: 'get_settings', token: token }, 60000).then(function (j) {
+      if (j._status === 401) { token = null; store('sara-portal-token', null); showSignin(); siMsg('Your session ended. Please sign in again.'); return; }
+      $('set-loading').hidden = true;
+      if (!j.ok || !j.settings) { $('set-warn').textContent = j.error || j.settings_error || "Couldn't load your settings. Please try again."; $('set-warn').hidden = false; return; }
+      SaraSettings.mount($('set-body'), j.settings); $('set-save').disabled = false;
+    }).catch(function () { $('set-loading').textContent = "Couldn't reach Sara right now. Go back and try again."; });
+  }
+  function closeSettings() {
+    if (!leaveOk()) return;
+    setDirty = false; $('settings-view').hidden = true; $('set-bar').hidden = true; $('dash').hidden = false; window.scrollTo(0, 0);
+  }
+  function markDirty() { if (!setSaving) { setDirty = true; setMsg('Unsaved changes.'); } }
+  $('open-settings').addEventListener('click', openSettings);
+  $('set-back').addEventListener('click', closeSettings);
+  $('set-body').addEventListener('input', markDirty);
+  $('set-body').addEventListener('change', markDirty);
+  $('set-body').addEventListener('click', function (ev) { if (ev.target.closest('.se-x, .se-add')) markDirty(); });
+  window.addEventListener('beforeunload', function (ev) { if (setDirty) { ev.preventDefault(); ev.returnValue = ''; } });
+  $('set-save').addEventListener('click', function () {
+    if (setSaving) return;
+    var r = SaraSettings.read();
+    if (r.error) { setMsg(r.error, 'error'); return; }
+    setSaving = true; $('set-save').disabled = true; $('set-save').textContent = 'Saving…';
+    setMsg('Saving. This takes about 20 seconds…');
+    post({ action: 'save_settings', token: token, settings: JSON.stringify(r.settings) }, 90000).then(function (j) {
+      setSaving = false; $('set-save').disabled = false; $('set-save').textContent = 'Save changes';
+      if (j._status === 401) { setDirty = false; token = null; store('sara-portal-token', null); showSignin(); siMsg('Your session ended. Please sign in again; your changes were not saved.'); return; }
+      if (j._status === 429) { setMsg('Too many saves in a short time. Please wait a few minutes and try again.', 'error'); return; }
+      if (!j.ok) { setMsg(j.error || "Couldn't save. Please try again.", 'error'); return; }
+      setDirty = false; setMsg('Saved. Sara uses the new details from her next call.', 'ok');
+    }).catch(function () {
+      setSaving = false; $('set-save').disabled = false; $('set-save').textContent = 'Save changes';
+      setMsg("Couldn't confirm the save (the connection dropped). Reload the page to check, then save again if needed.", 'error');
     });
   });
 

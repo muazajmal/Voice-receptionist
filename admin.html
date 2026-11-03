@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sara Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#06080f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2306080f'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23f0cd8f'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #06080f; --card: #0e1224; --card-2: #121731; --line: rgba(255,255,255,0.09); --line-strong: rgba(255,255,255,0.18);
+    --gold: #f0cd8f; --gold-deep: #d9a65a; --text: #f4f5fa; --muted: #b0b7c9; --dim: #8189a0; --good: #7fd1ad;
+    --display: 'Archivo', 'Manrope', system-ui, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { font-family: 'Manrope', system-ui, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; line-height: 1.5; min-height: 100vh;
+    background-image: radial-gradient(800px 500px at 90% -10%, rgba(217,166,90,0.13), transparent 70%), radial-gradient(700px 500px at -10% 110%, rgba(108,92,214,0.12), transparent 70%); background-attachment: fixed; }
+  a { color: inherit; }
+  button, input, select, textarea { font: inherit; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+  [hidden] { display: none !important; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+
+  .bar { position: sticky; top: 0; z-index: 10; background: rgba(6,8,15,0.82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+  .bar .wrap { display: flex; align-items: center; height: 68px; }
+  .brand { display: flex; align-items: center; font-family: var(--display); font-weight: 800; font-size: 22px; text-decoration: none; }
+  .brand i { width: 11px; height: 11px; border-radius: 50%; background: var(--gold); margin-right: 10px; box-shadow: 0 0 14px var(--gold); }
+  .brand small { font-family: 'Manrope'; font-weight: 700; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #1d1505; background: var(--gold); border-radius: 999px; padding: 2px 9px; margin-left: 10px; }
+  .bar-right { margin-left: auto; display: flex; align-items: center; }
+  .who { font-size: 14px; color: var(--muted); margin-right: 16px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 22px; border-radius: 999px; font-weight: 700; font-size: 15px; cursor: pointer; text-decoration: none;
+    border: 1px solid var(--line-strong); background: rgba(255,255,255,0.05); color: var(--text); transition: border-color .2s ease, color .2s ease, box-shadow .2s ease; white-space: nowrap; }
+  .btn:hover { border-color: var(--gold); color: var(--gold); }
+  .btn.gold { background: linear-gradient(180deg, #f7dcaa, var(--gold-deep)); color: #1d1505; border-color: transparent; box-shadow: 0 10px 34px -12px rgba(217,166,90,0.8); }
+  .btn.gold:hover { color: #1d1505; }
+  .btn.small { padding: 8px 16px; font-size: 14px; }
+  .btn[disabled] { opacity: .6; cursor: default; }
+  label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+  .field { width: 100%; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line-strong); background: rgba(255,255,255,0.04); color: var(--text); font-size: 16px; }
+  .field:focus { outline: none; border-color: rgba(240,205,143,0.7); box-shadow: 0 0 0 3px rgba(240,205,143,0.15); }
+  select.field option { background: #0e1224; }
+  .msg { min-height: 22px; margin-top: 14px; font-size: 14.5px; color: var(--muted); }
+  .msg.error { color: #ff9b9b; }
+  .linkbtn { background: none; border: 0; color: var(--gold); font-weight: 600; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+
+  /* sign-in */
+  .signin { min-height: calc(100vh - 68px); display: grid; place-items: center; padding: 48px 20px; }
+  .signin-card { width: 100%; max-width: 440px; padding: 38px 34px 32px; border-radius: 28px; background: var(--card); border: 1px solid rgba(240,205,143,0.22); box-shadow: 0 40px 100px -30px rgba(0,0,0,0.85); }
+  .signin h1 { font-family: var(--display); font-weight: 900; font-size: 30px; letter-spacing: -0.02em; line-height: 1.1; }
+  .signin p.lead { color: var(--muted); margin: 10px 0 26px; font-size: 16px; }
+  .signin .btn { width: 100%; margin-top: 16px; padding: 15px; }
+  .code-field { letter-spacing: 0.5em; font-size: 26px; font-weight: 700; text-align: center; padding: 14px 10px 14px 22px; font-variant-numeric: tabular-nums; }
+
+  /* clients */
+  .page { padding: 34px 0 120px; }
+  .head { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 22px; }
+  .head h1 { font-family: var(--display); font-weight: 900; font-size: clamp(28px, 4vw, 38px); letter-spacing: -0.025em; line-height: 1.05; }
+  .head p { color: var(--muted); margin-top: 6px; }
+  .head-tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .search { width: 240px; padding: 10px 14px; font-size: 15px; }
+  .list { list-style: none; border-radius: 22px; background: var(--card); border: 1px solid var(--line); overflow: hidden; }
+  .cl { display: flex; align-items: center; gap: 16px; padding: 18px 22px; border-top: 1px solid var(--line); cursor: pointer; }
+  .cl:first-child { border-top: 0; }
+  .cl:hover { background: rgba(255,255,255,0.025); }
+  .cl .av { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; font-family: var(--display); font-weight: 800; color: var(--gold); background: rgba(240,205,143,0.1); }
+  .cl .b { flex: 1 1 auto; min-width: 0; }
+  .cl .b b { display: block; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cl .b span { font-size: 14px; color: var(--dim); }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 700; text-transform: capitalize; border: 1px solid var(--line-strong); color: var(--muted); }
+  .pill.active { color: var(--good); border-color: rgba(127,209,173,0.4); }
+  .pill.setup { color: var(--gold); border-color: rgba(240,205,143,0.4); }
+  .pill.paused, .pill.cancelled { color: #ff9b9b; border-color: rgba(239,107,107,0.4); }
+  .empty, .loading { padding: 48px 24px; text-align: center; color: var(--muted); }
+
+  /* editor */
+  .back { margin-bottom: 18px; }
+  .card { padding: 22px 22px 20px; border-radius: 22px; background: var(--card); border: 1px solid var(--line); margin-bottom: 26px; }
+  .card h2 { font-family: var(--display); font-weight: 800; font-size: 20px; letter-spacing: -0.01em; }
+  .card > p { color: var(--muted); font-size: 14.5px; margin: 4px 0 16px; }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 18px; }
+  .grid .field, .card .field { padding: 11px 14px; font-size: 15px; border-radius: 12px; }
+  .grid small { display: block; color: var(--dim); font-size: 13px; margin-top: 5px; }
+  .sheet-link { display: inline-flex; margin-top: 14px; font-size: 14.5px; color: var(--gold); }
+  .users { list-style: none; margin-bottom: 14px; }
+  .users li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .users li:first-child { border-top: 0; }
+  .users li span { flex: 1 1 auto; overflow-wrap: anywhere; }
+  .users li.off span { color: var(--dim); text-decoration: line-through; }
+  .adduser { display: flex; gap: 10px; }
+  .adduser .field { flex: 1 1 auto; }
+  .warn { padding: 14px 16px; border-radius: 14px; background: rgba(239,107,107,0.08); border: 1px solid rgba(239,107,107,0.35); color: #ffc4c4; font-size: 14.5px; margin-bottom: 20px; }
+  .savebar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: rgba(9,12,22,0.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line-strong); }
+  .savebar .wrap { display: flex; align-items: center; gap: 16px; min-height: 72px; padding-top: 10px; padding-bottom: 10px; }
+  .savebar p { flex: 1 1 auto; font-size: 14.5px; color: var(--muted); }
+  .savebar p.error { color: #ff9b9b; }
+  .savebar p.ok { color: var(--good); }
+  .toast { position: fixed; left: 50%; bottom: 96px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; padding: 12px 20px; border-radius: 999px;
+    background: #1a2038; border: 1px solid var(--line-strong); box-shadow: 0 20px 50px -15px rgba(0,0,0,0.8); font-size: 15px; transition: opacity .25s ease, transform .25s ease; z-index: 50; max-width: calc(100vw - 32px); }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .toast.err { border-color: rgba(239,107,107,0.5); }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 0 16px; }
+    .who { display: none; }
+    .grid { grid-template-columns: 1fr; }
+    .cl { padding: 16px; }
+    .search { width: 100%; }
+    .head-tools { width: 100%; }
+    .signin-card { padding: 30px 22px 26px; }
+    .card { padding: 18px 16px; }
+    .adduser { flex-direction: column; }
+    .savebar .wrap { flex-wrap: wrap; gap: 8px; }
+    .savebar .btn { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="./"><i></i>Sara<small>Admin</small></a>
+    <div class="bar-right" id="bar-signed" hidden>
+      <span class="who" id="who"></span>
+      <button class="btn small" id="signout" type="button">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="signin" id="signin" hidden>
+    <div class="signin-card">
+      <h1>Sara admin</h1>
+      <p class="lead" id="si-lead">For the Sara owner only. Enter your email and we'll send a 6-digit code.</p>
+      <form id="form-email" novalidate>
+        <label for="si-email">Email</label>
+        <input class="field" id="si-email" type="email" autocomplete="email" inputmode="email" required>
+        <button class="btn gold" type="submit">Email me a code</button>
+      </form>
+      <form id="form-code" novalidate hidden>
+        <label for="si-code">6-digit code</label>
+        <input class="field code-field" id="si-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required placeholder="••••••">
+        <button class="btn gold" type="submit">Sign in</button>
+        <p class="msg"><button class="linkbtn" type="button" id="si-back">Use a different email</button></p>
+      </form>
+      <p class="msg" id="si-msg" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section class="page" id="clients" hidden>
+    <div class="wrap">
+      <div class="head">
+        <div><h1>Clients</h1><p id="cl-sub">Every business on Sara, from the Client Config Master sheet.</p></div>
+        <div class="head-tools">
+          <label class="sr-only" for="cl-search">Search clients</label>
+          <input class="field search" id="cl-search" type="search" placeholder="Search name or number">
+          <button class="btn small" id="cl-refresh" type="button">Refresh</button>
+        </div>
+      </div>
+      <ul class="list" id="cl-list"><li class="loading">Loading clients…</li></ul>
+    </div>
+  </section>
+
+  <section class="page" id="editor" hidden>
+    <div class="wrap">
+      <button class="btn small back" id="ed-back" type="button">← All clients</button>
+      <div class="head"><div><h1 id="ed-title">Client</h1><p id="ed-sub"></p></div></div>
+      <div id="ed-loading" class="loading">Loading this client…</div>
+      <div id="ed-body" hidden>
+        <div class="card">
+          <h2>Setup</h2>
+          <p>How Sara finds this client. Saved to the Client Config Master sheet.</p>
+          <div class="grid">
+            <div><label for="cf-name">Client name *</label><input class="field" id="cf-name" maxlength="120"></div>
+            <div><label for="cf-status">Status</label>
+              <select class="field" id="cf-status"><option value="setup">Setup</option><option value="active">Active</option><option value="paused">Paused</option><option value="cancelled">Cancelled</option></select>
+              <small>Only active clients get calls answered.</small></div>
+            <div><label for="cf-phone">Sara phone number</label><input class="field" id="cf-phone" inputmode="tel" placeholder="e.g. 16292054731"><small>Digits with country code. The number callers dial.</small></div>
+            <div><label for="cf-wa">WhatsApp phone number ID</label><input class="field" id="cf-wa" inputmode="numeric" placeholder="Optional"><small>From Meta, only if this client uses WhatsApp.</small></div>
+          </div>
+          <a class="sheet-link" id="cf-sheet" target="_blank" rel="noopener" hidden>Open this client's Google Sheet ↗</a>
+        </div>
+        <div id="ed-warn" class="warn" hidden></div>
+        <div id="ed-settings"></div>
+        <div class="card" style="margin-top:26px">
+          <h2>Dashboard logins</h2>
+          <p>People who can sign in to this client's dashboard with an emailed code. Changes here save straight away.</p>
+          <ul class="users" id="us-list"></ul>
+          <form class="adduser" id="us-form" novalidate>
+            <label class="sr-only" for="us-email">New login email</label>
+            <input class="field" id="us-email" type="email" placeholder="owner@business.com">
+            <button class="btn small" type="submit">Add login</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="savebar" id="savebar" hidden>
+  <div class="wrap">
+    <p id="save-msg" role="status" aria-live="polite">Changes go live on Sara's next call after you save.</p>
+    <button class="btn gold" id="save" type="button">Save changes</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="settings-editor.js"></script>
+<script>
+(function () {
+  var API = 'https://muazajmal212.app.n8n.cloud/webhook/sara-admin';
+  var $ = function (id) { return document.getElementById(id); };
+  // The admin session lasts this browser tab only (and at most 12 hours on the server).
+  function store(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) { return null; } }
+  var token = store('sara-admin-token');
+  var email = '';
+  var clients = [], current = null, dirty = false, saving = false;
+
+  function post(body, ms) {
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var t = ctrl ? setTimeout(function () { ctrl.abort(); }, ms || 30000) : 0;
+    return fetch(API, { method: 'POST', body: new URLSearchParams(body), signal: ctrl ? ctrl.signal : undefined })
+      .then(function (r) { clearTimeout(t); return r.json().catch(function () { return {}; }).then(function (j) { j._status = r.status; return j; }); });
+  }
+  function authed(body, ms) {
+    body.token = token;
+    return post(body, ms).then(function (j) {
+      if (j._status === 401) { signedOut(); throw new Error('signed_out'); }
+      return j;
+    });
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  var toastTimer = 0;
+  function toast(text, err) { var t = $('toast'); t.textContent = text; t.className = 'toast show' + (err ? ' err' : ''); clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.className = 'toast'; }, 4500); }
+  function fmtPhone(d) { d = String(d || ''); if (d.length === 11 && d[0] === '1') return '+1 (' + d.slice(1, 4) + ') ' + d.slice(4, 7) + '-' + d.slice(7); return d ? '+' + d : ''; }
+
+  // ---------- sign in ----------
+  function siMsg(text, err) { var m = $('si-msg'); m.textContent = text || ''; m.className = 'msg' + (err ? ' error' : ''); }
+  function show(view) {
+    ['signin', 'clients', 'editor'].forEach(function (v) { $(v).hidden = v !== view; });
+    $('bar-signed').hidden = view === 'signin';
+    $('savebar').hidden = view !== 'editor';
+    window.scrollTo(0, 0);
+  }
+  function signedOut() {
+    token = null; store('sara-admin-token', null); dirty = false;
+    show('signin'); $('form-email').hidden = false; $('form-code').hidden = true; siMsg('');
+    setTimeout(function () { $('si-email').focus(); }, 30);
+  }
+  $('form-email').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var e = $('si-email').value.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) { siMsg('Please enter a valid email address.', true); return; }
+    var btn = ev.target.querySelector('button'); btn.disabled = true; btn.textContent = 'Sending…';
+    post({ action: 'request_code', email: e }).then(function (j) {
+      btn.disabled = false; btn.textContent = 'Email me a code';
+      if (j._status === 429) { siMsg('Too many tries. Please wait a while and try again.', true); return; }
+      if (!j.ok) { siMsg("Couldn't send a code. Please try again.", true); return; }
+      email = e; $('form-email').hidden = true; $('form-code').hidden = false;
+      siMsg('If that email is the admin, a code is on its way. It expires in 10 minutes.');
+      setTimeout(function () { $('si-code').focus(); }, 30);
+    }).catch(function () { btn.disabled = false; btn.textContent = 'Email me a code'; siMsg("Couldn't reach the server. Please try again.", true); });
+  });
+  $('si-back').addEventListener('click', signedOut);
+  $('si-code').addEventListener('input', function () { this.value = this.value.replace(/\D/g, '').slice(0, 6); if (this.value.length === 6) $('form-code').requestSubmit(); });
+  $('form-code').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var code = $('si-code').value.replace(/\D/g, '');
+    if (code.length !== 6) { siMsg('Enter the 6-digit code from the email.', true); return; }
+    var btn = ev.target.querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = 'Checking…';
+    post({ action: 'verify', email: email, code: code }).then(function (j) {
+      btn.disabled = false; btn.textContent = 'Sign in';
+      if (j.ok && j.token) { token = j.token; store('sara-admin-token', token); store('sara-admin-email', j.email || email); $('si-code').value = ''; openList(); return; }
+      $('si-code').value = '';
+      siMsg(j.error === 'wrong_code' ? "That code isn't right. Check the email and try again." : j.error === 'too_many' ? 'Too many tries. Ask for a new code.' : 'That code has expired. Ask for a new one.', true);
+    }).catch(function () { btn.disabled = false; btn.textContent = 'Sign in'; siMsg("Couldn't reach the server. Please try again.", true); });
+  });
+  $('signout').addEventListener('click', function () {
+    if (dirty && !confirmLeave()) return;
+    if (token) post({ action: 'sign_out', token: token }).catch(function () {});
+    signedOut();
+  });
+
+  // ---------- clients list ----------
+  function renderList() {
+    var q = $('cl-search').value.trim().toLowerCase();
+    var qd = q.replace(/\D/g, '');
+    var list = clients.filter(function (c) { return !q || c.client_name.toLowerCase().indexOf(q) >= 0 || (qd && c.phone_number.indexOf(qd) >= 0); });
+    $('cl-sub').textContent = clients.length + (clients.length === 1 ? ' client' : ' clients') + ' · ' + clients.filter(function (c) { return c.status === 'active'; }).length + ' active';
+    if (!list.length) { $('cl-list').innerHTML = '<li class="empty">' + (clients.length ? 'No clients match that search.' : 'No clients yet. New sign-ups appear here automatically.') + '</li>'; return; }
+    $('cl-list').innerHTML = list.map(function (c) {
+      var initial = (c.client_name || '?').trim().charAt(0).toUpperCase();
+      var bits = [c.phone_number ? fmtPhone(c.phone_number) : 'No Sara number yet', c.users + (c.users === 1 ? ' login' : ' logins')];
+      return '<li class="cl" tabindex="0" role="button" data-row="' + c.row + '"><div class="av" aria-hidden="true">' + esc(initial) + '</div>' +
+        '<div class="b"><b>' + esc(c.client_name || 'Unnamed client') + '</b><span>' + esc(bits.join(' · ')) + '</span></div>' +
+        '<span class="pill ' + esc(c.status) + '">' + esc(c.status) + '</span></li>';
+    }).join('');
+  }
+  function openList() {
+    show('clients');
+    $('who').textContent = store('sara-admin-email') || '';
+    $('cl-list').innerHTML = '<li class="loading">Loading clients…</li>';
+    return authed({ action: 'list' }).then(function (j) {
+      if (!j.ok) { $('cl-list').innerHTML = '<li class="empty">' + esc(j.error || "Couldn't load clients.") + '</li>'; return; }
+      clients = j.clients || []; renderList();
+    }).catch(function (e) { if (e.message !== 'signed_out') $('cl-list').innerHTML = '<li class="empty">Couldn\'t reach the server. Press Refresh to try again.</li>'; });
+  }
+  $('cl-search').addEventListener('input', renderList);
+  $('cl-refresh').addEventListener('click', openList);
+  function pick(ev) { var li = ev.target.closest('.cl'); if (li) openClient(parseInt(li.getAttribute('data-row'), 10)); }
+  $('cl-list').addEventListener('click', pick);
+  $('cl-list').addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); pick(ev); } });
+
+  // ---------- one client ----------
+  function confirmLeave() { return window.confirm('You have unsaved changes. Leave without saving?'); }
+  function saveMsg(text, cls) { var m = $('save-msg'); m.textContent = text; m.className = cls || ''; }
+  function openClient(row) {
+    show('editor'); dirty = false;
+    $('ed-loading').hidden = false; $('ed-loading').textContent = 'Loading this client…'; $('ed-body').hidden = true; $('save').disabled = true;
+    var c0 = clients.find(function (c) { return c.row === row; });
+    $('ed-title').textContent = c0 ? c0.client_name : 'Client'; $('ed-sub').textContent = '';
+    saveMsg("Changes go live on Sara's next call after you save.");
+    authed({ action: 'get', row: row }, 60000).then(function (j) {
+      if (!j.ok) { $('ed-loading').textContent = j.error || "Couldn't load this client."; return; }
+      current = j;
+      var c = j.client;
+      $('ed-title').textContent = c.client_name || 'Unnamed client';
+      $('ed-sub').textContent = (c.phone_number ? fmtPhone(c.phone_number) + ' · ' : '') + 'Row ' + c.row + ' of the Client Config Master';
+      $('cf-name').value = c.client_name; $('cf-status').value = c.status || 'setup'; $('cf-phone').value = c.phone_number; $('cf-wa').value = c.whatsapp_phone_number_id;
+      var link = $('cf-sheet');
+      if (/^[A-Za-z0-9_-]{20,80}$/.test(c.sheet_id)) { link.href = 'https://docs.google.com/spreadsheets/d/' + c.sheet_id + '/edit'; link.hidden = false; } else link.hidden = true;
+      if (j.settings) { $('ed-warn').hidden = true; SaraSettings.mount($('ed-settings'), j.settings); $('save').disabled = false; }
+      else { $('ed-warn').textContent = j.settings_error || "Couldn't read this client's sheet."; $('ed-warn').hidden = false; $('ed-settings').innerHTML = ''; $('save').disabled = true; }
+      renderUsers();
+      $('ed-loading').hidden = true; $('ed-body').hidden = false;
+    }).catch(function (e) { if (e.message !== 'signed_out') $('ed-loading').textContent = "Couldn't reach the server. Go back and try again."; });
+  }
+  $('ed-back').addEventListener('click', function () { if (dirty && !confirmLeave()) return; dirty = false; openList(); });
+  $('editor').addEventListener('input', function (ev) { if (!ev.target.closest('#us-form')) { dirty = true; saveMsg('Unsaved changes.'); } });
+  $('editor').addEventListener('change', function (ev) { if (!ev.target.closest('#us-form')) { dirty = true; saveMsg('Unsaved changes.'); } });
+  $('editor').addEventListener('click', function (ev) { if (ev.target.closest('.se-x, .se-add')) { dirty = true; saveMsg('Unsaved changes.'); } });
+  window.addEventListener('beforeunload', function (ev) { if (dirty) { ev.preventDefault(); ev.returnValue = ''; } });
+
+  $('save').addEventListener('click', function () {
+    if (!current || saving) return;
+    var name = $('cf-name').value.trim(), phone = $('cf-phone').value.replace(/\D/g, ''), status = $('cf-status').value, wa = $('cf-wa').value.replace(/\D/g, '');
+    if (!name) { saveMsg('Client name is required.', 'error'); $('cf-name').focus(); return; }
+    if (phone && (phone.length < 8 || phone.length > 15)) { saveMsg('Sara number must be 8 to 15 digits, with country code.', 'error'); $('cf-phone').focus(); return; }
+    if (status === 'active' && !phone) { saveMsg('Add the Sara phone number before making the client active.', 'error'); $('cf-phone').focus(); return; }
+    var r = SaraSettings.read();
+    if (r.error) { saveMsg(r.error, 'error'); return; }
+    saving = true; $('save').disabled = true; $('save').textContent = 'Saving…';
+    saveMsg('Saving to the Google Sheet. This takes about 20 seconds…');
+    authed({ action: 'save', row: current.client.row, config: JSON.stringify({ client_name: name, phone_number: phone, status: status, whatsapp_phone_number_id: wa }), settings: JSON.stringify(r.settings) }, 90000).then(function (j) {
+      saving = false; $('save').disabled = false; $('save').textContent = 'Save changes';
+      if (!j.ok) { saveMsg(j.error || "Couldn't save. Please try again.", 'error'); return; }
+      dirty = false; saveMsg('Saved. Sara uses the new details from her next call.', 'ok'); toast('Saved');
+      current.client.client_name = name; $('ed-title').textContent = name;
+      var c = clients.find(function (x) { return x.row === current.client.row; });
+      if (c) { c.client_name = name; c.phone_number = phone; c.status = status; c.whatsapp_phone_number_id = wa; }
+    }).catch(function (e) {
+      saving = false; $('save').disabled = false; $('save').textContent = 'Save changes';
+      if (e.message !== 'signed_out') saveMsg("Couldn't confirm the save (the connection dropped). Reopen this client to check, then save again if needed.", 'error');
+    });
+  });
+
+  // ---------- dashboard logins ----------
+  function renderUsers() {
+    var us = current.users || [];
+    $('us-list').innerHTML = us.length ? us.map(function (u) {
+      return '<li class="' + (u.active ? '' : 'off') + '"><span>' + esc(u.email) + '</span><button class="btn small" type="button" data-id="' + u.id + '" data-on="' + (u.active ? 'false' : 'true') + '">' + (u.active ? 'Switch off' : 'Switch on') + '</button></li>';
+    }).join('') : '<li><span style="color:var(--dim)">No logins yet.</span></li>';
+  }
+  $('us-list').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button[data-id]'); if (!b) return;
+    var id = parseInt(b.getAttribute('data-id'), 10), on = b.getAttribute('data-on') === 'true';
+    b.disabled = true;
+    authed({ action: 'set_user', user_id: id, active: on }).then(function (j) {
+      b.disabled = false;
+      if (!j.ok) { toast(j.error || "Couldn't change that login.", true); return; }
+      current.users.forEach(function (u) { if (u.id === id) u.active = on; }); renderUsers();
+      toast(on ? 'Login switched on' : 'Login switched off. They are signed out straight away.');
+    }).catch(function () { b.disabled = false; });
+  });
+  $('us-form').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var e = $('us-email').value.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) { toast('Enter a valid email address.', true); $('us-email').focus(); return; }
+    var btn = ev.target.querySelector('button'); btn.disabled = true;
+    authed({ action: 'add_user', row: current.client.row, new_email: e }).then(function (j) {
+      btn.disabled = false;
+      if (!j.ok) { toast(j.error || "Couldn't add that login.", true); return; }
+      $('us-email').value = ''; toast('Login added. They can sign in at the dashboard now.');
+      return authed({ action: 'get', row: current.client.row }, 60000).then(function (k) { if (k.ok) { current.users = k.users; renderUsers(); } });
+    }).catch(function () { btn.disabled = false; });
+  });
+
+  if (token) openList(); else signedOut();
+})();
+</script>
+</body>
+</html>
