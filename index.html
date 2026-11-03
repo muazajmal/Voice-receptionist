@@ -46,6 +46,7 @@
   "mainEntity": [
     { "@type": "Question", "name": "What kinds of businesses is Sara for?", "acceptedAnswer": { "@type": "Answer", "text": "Businesses that live on the phone and book appointments: clinics, dental and beauty practices, salons, and home service companies." } },
     { "@type": "Question", "name": "Can callers still reach a real person?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. When a caller asks for someone, Sara notes why and transfers them to the right person or department. If no one is available, she takes a callback request." } },
+    { "@type": "Question", "name": "Does Sara speak other languages?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Sara answers in the language your customer uses and books the appointment in that language too. On phone calls she understands English, Spanish, French, German, Portuguese, Russian, Turkish, Arabic, Persian, Chinese and Hindi/Urdu. In website chat she can reply in almost any language, including Pashto and Punjabi." } },
     { "@type": "Question", "name": "What does Sara actually connect to?", "acceptedAnswer": { "@type": "Answer", "text": "Sara runs on your own automation workflow and writes every appointment, ticket, transfer, and callback to your activity dashboard in real time." } },
     { "@type": "Question", "name": "Can I see the activity feed anywhere else?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — the web dashboard and the Chrome extension both show the same live feed, so you can check in from your desk or your browser toolbar." } },
     { "@type": "Question", "name": "Is there a setup fee?", "acceptedAnswer": { "@type": "Answer", "text": "No. $199/month covers everything on the Starter plan — no separate onboarding charge." } },
@@ -557,6 +558,15 @@
   .sara[data-state="speaking"] .sara-orb::before { opacity: 1; }
   .sara-hint { min-height: 22px; margin-top: 14px; font-size: 14px; color: var(--muted); text-align: center; max-width: 30ch; }
   .sara-hint.heard { color: var(--text); font-style: italic; }
+  .sara-lang { display: flex; align-items: center; margin-top: 10px; font-size: 12.5px; color: var(--dim); }
+  .sara-lang span { margin-right: 8px; }
+  .sara-lang select {
+    font: inherit; font-size: 13px; color: var(--text); padding: 5px 10px; border-radius: 999px; cursor: pointer;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--line-strong); max-width: 190px;
+  }
+  .sara-lang select:focus { outline: none; border-color: rgba(240,205,143,0.65); box-shadow: 0 0 0 3px rgba(240,205,143,0.14); }
+  .sara-lang option { color: #151a2c; }
+  .sara-msg p[dir="rtl"] { text-align: right; }
 
   .sara-log { list-style: none; flex: 1 1 auto; overflow-y: auto; padding: 8px 16px 12px; scroll-behavior: smooth; overscroll-behavior: contain; }
   .sara-msg { display: flex; margin: 8px 0; }
@@ -938,6 +948,10 @@
         <p>Yes. When a caller asks for someone, Sara notes why and transfers them to the right person or department. If no one is available, she takes a callback request.</p>
       </details>
       <details>
+        <summary>Does Sara speak other languages?</summary>
+        <p>Yes. Sara answers in the language your customer uses and books the appointment in that language too. On phone calls she understands English, Spanish, French, German, Portuguese, Russian, Turkish, Arabic, Persian, Chinese and Hindi/Urdu. In website chat she can reply in almost any language, including Pashto and Punjabi.</p>
+      </details>
+      <details>
         <summary>What does Sara actually connect to?</summary>
         <p>Sara runs on your own automation workflow and writes every appointment, ticket, transfer, and callback to your activity dashboard in real time.</p>
       </details>
@@ -1063,6 +1077,30 @@
     <div class="sara-stage">
       <div class="sara-orb" id="sara-orb" aria-hidden="true"><span></span></div>
       <p class="sara-hint" id="sara-hint">Tap the mic and start talking</p>
+      <label class="sara-lang" title="Sara replies in whatever language you use. Pick yours so she can hear you speak it.">
+        <span>Speaking</span>
+        <select id="sara-lang" aria-label="Language you will speak">
+          <option value="en-US">English</option>
+          <option value="ur-PK">اردو · Urdu</option>
+          <option value="ps-AF">پښتو · Pashto</option>
+          <option value="pa-IN">ਪੰਜਾਬੀ · Punjabi</option>
+          <option value="hi-IN">हिन्दी · Hindi</option>
+          <option value="ar-SA">العربية · Arabic</option>
+          <option value="fa-IR">فارسی · Persian</option>
+          <option value="ru-RU">Русский · Russian</option>
+          <option value="zh-CN">中文 · Chinese</option>
+          <option value="es-ES">Español · Spanish</option>
+          <option value="fr-FR">Français · French</option>
+          <option value="de-DE">Deutsch · German</option>
+          <option value="pt-BR">Português · Portuguese</option>
+          <option value="it-IT">Italiano · Italian</option>
+          <option value="tr-TR">Türkçe · Turkish</option>
+          <option value="bn-BD">বাংলা · Bengali</option>
+          <option value="id-ID">Bahasa Indonesia</option>
+          <option value="ja-JP">日本語 · Japanese</option>
+          <option value="ko-KR">한국어 · Korean</option>
+        </select>
+      </label>
     </div>
 
     <ol class="sara-log" id="sara-log" aria-live="polite" aria-label="Conversation"></ol>
@@ -1280,6 +1318,27 @@
   store('sara-session', sessionId);
   var soundOn = store('sara-sound') !== 'off';
 
+  // Sara replies in whatever language the visitor uses. For voice, the browser needs to know which
+  // language to listen for, so the visitor picks it (defaults to their browser's language when listed).
+  var langSel = $('sara-lang');
+  var LANGS = [].map.call(langSel.options, function (o) { return o.value; });
+  function guessLang() {
+    var nav = (navigator.languages && navigator.languages[0]) || navigator.language || 'en-US';
+    if (LANGS.indexOf(nav) >= 0) return nav;
+    var base = nav.split('-')[0].toLowerCase();
+    for (var i = 0; i < LANGS.length; i++) if (LANGS[i].split('-')[0] === base) return LANGS[i];
+    return 'en-US';
+  }
+  var speechLang = store('sara-lang');
+  if (LANGS.indexOf(speechLang) < 0) speechLang = guessLang();
+  langSel.value = speechLang;
+  langSel.addEventListener('change', function () {
+    speechLang = langSel.value;
+    store('sara-lang', speechLang);
+    if (listening && rec) { try { rec.abort(); } catch (x) {} }
+    setState('idle', SR ? 'Tap the mic and speak in ' + langSel.options[langSel.selectedIndex].text.split(' · ').pop() : 'Type a message below');
+  });
+
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   var rec = null, listening = false, heardFinal = false;
   var talkMode = false;           // true while the visitor is talking by voice: Sara listens again after she speaks
@@ -1301,6 +1360,7 @@
     var li = document.createElement('li');
     li.className = 'sara-msg ' + role;
     var p = document.createElement('p');
+    p.setAttribute('dir', 'auto');   // Urdu, Pashto, Arabic and Persian read right to left
     p.textContent = text;
     if (extraNode) p.appendChild(extraNode);
     li.appendChild(p);
@@ -1399,7 +1459,7 @@
     return new Promise(function (resolve) {
       if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) return resolve(false);
       var u = new SpeechSynthesisUtterance(text);
-      u.lang = 'en-US'; u.rate = 1.02;
+      u.lang = speechLang; u.rate = 1.02;
       u.onend = u.onerror = function () { resolve(true); };
       setState('speaking', 'Tap the mic to interrupt');
       window.speechSynthesis.speak(u);
@@ -1501,7 +1561,7 @@
     turn++;                       // anything Sara was about to say is dropped
     if (listening) return;
     rec = new SR();
-    rec.lang = 'en-US';
+    rec.lang = speechLang;
     rec.interimResults = true;
     rec.continuous = false;
     rec.maxAlternatives = 1;
@@ -1515,6 +1575,7 @@
     rec.onerror = function (e) {
       listening = false; talkMode = false;
       if (e.error === 'not-allowed' || e.error === 'service-not-allowed') setState('idle', 'Allow microphone access to talk, or type below');
+      else if (e.error === 'language-not-supported') setState('idle', "Your browser can't hear this language yet. Type it below and Sara will reply in it");
       else if (e.error === 'no-speech') setState('idle', "I didn't hear anything. Tap the mic to try again");
       else if (e.error !== 'aborted') setState('idle', 'Voice input stopped. Tap the mic, or type below');
     };
