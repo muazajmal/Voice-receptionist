@@ -1,0 +1,730 @@
+{
+  "name": "Sara - Customer Portal API",
+  "nodes": [
+    {
+      "id": "6a79bb81-511a-41ad-93a4-d09f87a8d1a2",
+      "name": "Portal Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sara-portal",
+        "authentication": "none",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      }
+    },
+    {
+      "id": "513cf3b5-80f9-4362-8dae-ba6fab1ca075",
+      "name": "Load Accounts",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_PORTAL_ACCOUNTS_TABLE_ID"
+        },
+        "returnAll": true
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "ab5a7761-12bc-43dc-bdcd-96518ab1c7c4",
+      "name": "Handle Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Sara customer portal: email sign-in codes, sessions and access checks.\n// Codes and sessions are kept only as SHA-256 hashes in this workflow's static data.\nconst req = $('Portal Webhook').first().json;\nconst body = req.body || {};\nconst h = req.headers || {};\nconst ip = String(h['cf-connecting-ip'] || h['x-real-ip'] || String(h['x-forwarded-for'] || '').split(',')[0] || 'unknown').trim();\nconst action = String(body.action || '').trim();\nconst email = String(body.email || '').trim().toLowerCase().slice(0, 160);\nconst crypto = require('crypto');\nconst sha = function (s) { return crypto.createHash('sha256').update(String(s)).digest('hex'); };\nconst digits = function (v) { return String(v == null ? '' : v).replace(/\\D/g, ''); };\nconst sd = $getWorkflowStaticData('global');\nsd.codes = sd.codes || {};\nsd.sessions = sd.sessions || {};\nconst now = Date.now();\nObject.keys(sd.codes).forEach(function (k) { if (sd.codes[k].exp < now) delete sd.codes[k]; });\nObject.keys(sd.sessions).forEach(function (k) { if (sd.sessions[k].exp < now) delete sd.sessions[k]; });\nconst hour = Math.floor(now / 3600000);\nif (!sd.rate || sd.rate.hour !== hour) sd.rate = { hour: hour, ip: {}, email: {}, data: {} };\n\nfunction out(next, extra) { return [{ json: Object.assign({ next: next }, extra) }]; }\nfunction reply(status, payload) { return out('respond', { status: status, body: payload }); }\nconst accounts = $input.all().map(function (i) { return i.json; })\n  .filter(function (a) { return a && a.email && (a.active === true || String(a.active).toLowerCase() === 'true'); });\nfunction findAccount(e, phone) {\n  return accounts.find(function (a) {\n    return String(a.email).trim().toLowerCase() === e && (phone === undefined || digits(a.client_phone) === phone);\n  });\n}\n\nif (action === 'request_code') {\n  if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return reply(400, { ok: false, error: 'bad_email' });\n  sd.rate.ip[ip] = (sd.rate.ip[ip] || 0) + 1;\n  sd.rate.email[email] = (sd.rate.email[email] || 0) + 1;\n  if (sd.rate.ip[ip] > 20 || sd.rate.email[email] > 5) return reply(429, { ok: false, error: 'too_many' });\n  const acct = findAccount(email);\n  // Same answer whether or not the email has an account, so nobody can probe for customers.\n  if (!acct) return reply(200, { ok: true });\n  const code = String(crypto.randomInt(0, 1000000)).padStart(6, '0');\n  sd.codes[email] = { hash: sha(email + ':' + code), exp: now + 10 * 60000, tries: 0 };\n  return out('send_code', { email: email, code: code, business: acct.business_name || 'your business' });\n}\n\nif (action === 'verify') {\n  const code = String(body.code || '').replace(/\\D/g, '');\n  const rec = sd.codes[email];\n  if (!rec) return reply(401, { ok: false, error: 'expired' });\n  rec.tries = (rec.tries || 0) + 1;\n  if (rec.tries > 5) { delete sd.codes[email]; return reply(429, { ok: false, error: 'too_many' }); }\n  if (sha(email + ':' + code) !== rec.hash) return reply(401, { ok: false, error: 'wrong_code' });\n  delete sd.codes[email];\n  const acct = findAccount(email);\n  if (!acct) return reply(401, { ok: false, error: 'no_account' });\n  const token = crypto.randomBytes(32).toString('hex');\n  sd.sessions[sha(token)] = { email: email, client_phone: digits(acct.client_phone), sheet_id: String(acct.sheet_id || ''), business: acct.business_name || '', exp: now + 30 * 86400000 };\n  return reply(200, { ok: true, token: token, business: acct.business_name || '', email: email });\n}\n\nif (action === 'data' || action === 'sign_out' || action === 'set_status') {\n  const token = String(body.token || '');\n  const key = /^[a-f0-9]{64}$/.test(token) ? sha(token) : '';\n  const s = key ? sd.sessions[key] : null;\n  if (!s) return reply(401, { ok: false, error: 'signed_out' });\n  if (action === 'sign_out') { delete sd.sessions[key]; return reply(200, { ok: true }); }\n  // An account switched off in the table loses access straight away.\n  if (!findAccount(s.email, s.client_phone)) { delete sd.sessions[key]; return reply(401, { ok: false, error: 'signed_out' }); }\n  sd.rate.data[key] = (sd.rate.data[key] || 0) + 1;\n  if (sd.rate.data[key] > 300) return reply(429, { ok: false, error: 'too_many' });\n  const result = { client_phone: s.client_phone, sheet_id: s.sheet_id || '', business: s.business, email: s.email };\n  if (action === 'set_status') {\n    // Only the status cell of a row in the signed-in business's own sheet can change, and only to these values.\n    const TABS = { appointment: 'Appointments', ticket: 'Tickets', transfer: 'Transfers', callback: 'Call Backs' };\n    const ALLOWED = { appointment: ['completed', 'booked'], ticket: ['resolved', 'open'], transfer: ['done', 'pending'], callback: ['done', 'pending'] };\n    const type = String(body.type || '');\n    const row = parseInt(body.row, 10);\n    const status = String(body.status || '').toLowerCase();\n    if (!TABS[type] || !(row >= 2 && row < 100000) || ALLOWED[type].indexOf(status) < 0) return reply(400, { ok: false, error: 'bad_update' });\n    result.update = { tab: TABS[type], row: row, status: status };\n  }\n  return out('read_data', result);\n}\n\nreturn reply(400, { ok: false, error: 'bad_action' });\n",
+        "mode": "runOnceForAllItems"
+      }
+    },
+    {
+      "id": "a8966482-8a1f-4997-ad7c-0c1ffa47dcc9",
+      "name": "Route",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        660,
+        300
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "outputKey": "Send code",
+              "renameOutput": true,
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.next }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "send_code"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "outputKey": "Read data",
+              "renameOutput": true,
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.next }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "read_data"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Reply"
+        }
+      }
+    },
+    {
+      "id": "4ae5b132-5422-41f4-8cc1-848e8054ed31",
+      "name": "Email Sign-in Code",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        900,
+        100
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json.code }} is your Sara dashboard sign-in code",
+        "emailType": "text",
+        "message": "=Hi,\n\nYour sign-in code for the {{ $json.business }} dashboard is:\n\n{{ $json.code }}\n\nIt expires in 10 minutes. If you did not ask for it, you can ignore this email.\n\nSara",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Sara"
+        }
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "id": "07f13c47-0286-4615-a8b6-31cd7f71941e",
+      "name": "Respond Code Sent",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1120,
+        100
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"ok\": true }",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "f7708dfe-4fdb-4b2d-ab36-955db41a8eea",
+      "name": "Read Client Config",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "sheet",
+        "operation": "read",
+        "range": "Client Config Master!A:F",
+        "sheetId": "YOUR_CLIENT_CONFIG_MASTER_SHEET_ID"
+      },
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "98927d68-5122-4074-93ab-5c781757c389",
+      "name": "Pick Client Sheet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Finds this business's own sheet: stored on its account (self-serve sign-ups),\n// otherwise looked up by its Sara phone number in the Client Config Master.\nconst who = $('Handle Request').first().json;\nif (who.sheet_id) return [{ json: { sheet_id: String(who.sheet_id), client_name: who.business || '' } }];\nconst want = who.client_phone;\nconst digits = function (v) { return String(v == null ? '' : v).replace(/\\D/g, ''); };\nconst row = want ? $input.all().map(function (i) { return i.json; }).find(function (r) { return digits(r.phone_number) === want; }) : null;\nreturn [{ json: { sheet_id: row && row.sheet_id ? String(row.sheet_id) : 'missing', client_name: row ? (row.client_name || '') : '' } }];\n",
+        "mode": "runOnceForAllItems"
+      }
+    },
+    {
+      "id": "fc13d2b8-16a7-483c-8566-f995dd83068c",
+      "name": "Build Feed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2440,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Turns the business's sheet tabs into one activity feed plus headline numbers.\nconst who = $('Handle Request').first().json;\nfunction rows(name) {\n  try { return $(name).all().map(function (i) { return i.json; }).filter(function (r) { return r && !r.error && Object.keys(r).filter(function (k) { return k !== 'row_number'; }).length > 0; }); }\n  catch (e) { return []; }\n}\nfunction txt(v) { if (v === undefined || v === null) return ''; const s = String(v).trim(); return s.indexOf('#ERROR') === 0 ? '' : s; }\n// Sheets can return dates as serial numbers (days since 1899-12-30) or as text.\nfunction toTime(v) {\n  if (v === undefined || v === null || v === '') return NaN;\n  if (typeof v === 'number') return Math.round((v - 25569) * 86400000);\n  const s = String(v).trim();\n  const m = s.match(/^(\\d{4})-(\\d{2})-(\\d{2})(?:[ T](\\d{1,2}):(\\d{2})(?::(\\d{2}))?(?:\\.\\d+)?\\s*(AM|PM)?\\s*(Z|[+-]\\d{2}:?\\d{2})?)?$/i);\n  if (m) {\n    let hh = m[4] ? parseInt(m[4], 10) : 0;\n    if (m[7]) { const pm = m[7].toUpperCase() === 'PM'; if (pm && hh < 12) hh += 12; if (!pm && hh === 12) hh = 0; }\n    const iso = m[1] + '-' + m[2] + '-' + m[3] + 'T' + String(hh).padStart(2, '0') + ':' + (m[5] || '00') + ':' + (m[6] || '00') + (m[8] ? m[8] : '');\n    return Date.parse(iso);\n  }\n  return Date.parse(s);\n}\nfunction iso(t) { return isNaN(t) ? '' : new Date(t).toISOString(); }\n// Spreadsheet date numbers carry the business's own wall-clock time, so show them as written.\nconst DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nconst MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction wallText(v) {\n  if (typeof v !== 'number') return txt(v);\n  const d = new Date(Math.round((v - 25569) * 86400000));\n  let h = d.getUTCHours(); const m = d.getUTCMinutes(); const ap = h >= 12 ? 'PM' : 'AM';\n  h = h % 12 || 12;\n  const time = (d.getUTCHours() === 0 && m === 0) ? '' : ', ' + h + ':' + String(m).padStart(2, '0') + ' ' + ap;\n  return DAYS[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear() + time;\n}\nconst examples = ['APT-0001', 'TIX-0001'];\nconst activity = [];\n\nrows('Read Appointments').forEach(function (r) {\n  const id = txt(r.id);\n  if (examples.indexOf(id) >= 0 || id.indexOf('Legend') === 0) return;\n  const at = toTime(r.created_at);\n  if (isNaN(at)) return;\n  const when = toTime(r.datetime);\n  activity.push({ row: r.row_number, id: id || ('appt-' + at), type: 'appointment', name: txt(r.customer_name), phone: txt(r.phone),\n    detail: txt(r.service) || 'Appointment', when: isNaN(when) ? txt(r.datetime) : iso(when), when_text: wallText(r.datetime),\n    status: (txt(r.status) || 'booked').toLowerCase(), at: iso(at) });\n});\nrows('Read Tickets').forEach(function (r) {\n  const id = txt(r.ticket_id) || txt(r.id);\n  if (examples.indexOf(id) >= 0 || id.indexOf('Legend') === 0) return;\n  const at = toTime(r.created_at);\n  if (isNaN(at)) return;\n  activity.push({ row: r.row_number, id: id || ('ticket-' + at), type: 'ticket', name: txt(r.customer_name), phone: txt(r.phone_number) || txt(r.phone),\n    detail: txt(r.issue_description) || txt(r.issue) || 'Support ticket', priority: txt(r.priority).toLowerCase(),\n    status: (txt(r.status) || 'open').toLowerCase(), at: iso(at) });\n});\nrows('Read Transfers').forEach(function (r) {\n  const at = toTime(r.timestamp);\n  if (isNaN(at)) return;\n  activity.push({ row: r.row_number, id: 'transfer-' + at, type: 'transfer', name: txt(r.customer_name), phone: txt(r.caller_phone),\n    detail: txt(r.reason) || 'Transfer requested', department: txt(r.department), status: (txt(r.status) || 'pending').toLowerCase(), at: iso(at) });\n});\nrows('Read Call Backs').forEach(function (r) {\n  const at = toTime(r.timestamp);\n  if (isNaN(at)) return;\n  activity.push({ row: r.row_number, id: 'callback-' + at, type: 'callback', name: txt(r.customer_name), phone: txt(r.caller_phone),\n    detail: txt(r.notes) || 'Callback requested', when_text: wallText(r.callback_time), status: (txt(r.status) || 'pending').toLowerCase(), at: iso(at) });\n});\n\nconst seen = {};\nconst feed = activity.filter(function (a) { const k = a.type + a.id + a.at; if (seen[k]) return false; seen[k] = true; return true; })\n  .sort(function (a, b) { return Date.parse(b.at) - Date.parse(a.at); });\nconst now = Date.now(), week = now - 7 * 86400000;\nconst count = function (fn) { return feed.filter(fn).length; };\nconst stats = {\n  total: feed.length,\n  this_week: count(function (a) { return Date.parse(a.at) >= week; }),\n  appointments: count(function (a) { return a.type === 'appointment' && a.status !== 'cancelled' && a.status !== 'rescheduled'; }),\n  upcoming: count(function (a) { return a.type === 'appointment' && Date.parse(a.when) >= now && a.status !== 'cancelled' && a.status !== 'rescheduled'; }),\n  open_tickets: count(function (a) { return a.type === 'ticket' && ['resolved', 'closed'].indexOf(a.status) < 0; }),\n  transfers: count(function (a) { return a.type === 'transfer'; }),\n  pending_callbacks: count(function (a) { return a.type === 'callback' && ['done', 'completed', 'called'].indexOf(a.status) < 0; })\n};\nconst pick = $('Pick Client Sheet').first().json;\nreturn [{ json: { ok: true, business: who.business || pick.client_name || '', email: who.email, generated_at: new Date().toISOString(),\n  sheet_found: pick.sheet_id !== 'missing', stats: stats, activity: feed.slice(0, 250) } }];\n",
+        "mode": "runOnceForAllItems"
+      }
+    },
+    {
+      "id": "67abdb58-46a9-4cd1-9c71-1d92c13542fa",
+      "name": "Respond Data",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2660,
+        300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "db454db0-0487-41a9-b203-a44895459155",
+      "name": "Respond Reply",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        900,
+        520
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.body }}",
+        "options": {
+          "responseCode": "={{ $json.status }}",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "ee60f309-9ebe-4b62-a8db-75141ff32aa3",
+      "name": "Read Appointments",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1560,
+        300
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Pick Client Sheet').first().json.sheet_id }}"
+        },
+        "operation": "read",
+        "options": {
+          "outputFormatting": {
+            "values": {
+              "date": "SERIAL_NUMBER",
+              "general": "UNFORMATTED_VALUE"
+            }
+          }
+        },
+        "resource": "sheet",
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Appointments"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "319e02a8-3524-4c28-bd86-611edf90d7be",
+      "name": "Read Tickets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1780,
+        300
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Pick Client Sheet').first().json.sheet_id }}"
+        },
+        "operation": "read",
+        "options": {
+          "outputFormatting": {
+            "values": {
+              "date": "SERIAL_NUMBER",
+              "general": "UNFORMATTED_VALUE"
+            }
+          }
+        },
+        "resource": "sheet",
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Tickets"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "797e887d-d2d3-46cf-a175-94077faea08b",
+      "name": "Read Transfers",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2000,
+        300
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Pick Client Sheet').first().json.sheet_id }}"
+        },
+        "operation": "read",
+        "options": {
+          "outputFormatting": {
+            "values": {
+              "date": "SERIAL_NUMBER",
+              "general": "UNFORMATTED_VALUE"
+            }
+          }
+        },
+        "resource": "sheet",
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Transfers"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "60ae89c5-02c8-4e0f-b8a1-ef65ba1b1601",
+      "name": "Read Call Backs",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2220,
+        300
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Pick Client Sheet').first().json.sheet_id }}"
+        },
+        "operation": "read",
+        "options": {
+          "outputFormatting": {
+            "values": {
+              "date": "SERIAL_NUMBER",
+              "general": "UNFORMATTED_VALUE"
+            }
+          }
+        },
+        "resource": "sheet",
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Call Backs"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "c4f88630-4d80-4c6f-aec9-cad525fb592a",
+      "name": "Status Change?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1340,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "u1",
+              "leftValue": "={{ !!$('Handle Request').first().json.update }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          }
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "2ef83e85-18bc-4889-8518-e7e22c7a3ca3",
+      "name": "Write Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1450,
+        140
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "row_number",
+              "id": "row_number",
+              "readOnly": true,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "removed": false,
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {
+            "row_number": "={{ $('Handle Request').first().json.update.row }}",
+            "status": "={{ $('Handle Request').first().json.update.status }}"
+          }
+        },
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Pick Client Sheet').first().json.sheet_id }}"
+        },
+        "operation": "update",
+        "options": {
+          "cellFormat": "RAW"
+        },
+        "resource": "sheet",
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Handle Request').first().json.update.tab }}"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Portal Webhook": {
+      "main": [
+        [
+          {
+            "node": "Load Accounts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Accounts": {
+      "main": [
+        [
+          {
+            "node": "Handle Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Request": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route": {
+      "main": [
+        [
+          {
+            "node": "Email Sign-in Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Read Client Config",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Sign-in Code": {
+      "main": [
+        [
+          {
+            "node": "Respond Code Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Client Config": {
+      "main": [
+        [
+          {
+            "node": "Pick Client Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Feed": {
+      "main": [
+        [
+          {
+            "node": "Respond Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Client Sheet": {
+      "main": [
+        [
+          {
+            "node": "Status Change?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status Change?": {
+      "main": [
+        [
+          {
+            "node": "Write Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Read Appointments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Status": {
+      "main": [
+        [
+          {
+            "node": "Read Appointments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Appointments": {
+      "main": [
+        [
+          {
+            "node": "Read Tickets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Tickets": {
+      "main": [
+        [
+          {
+            "node": "Read Transfers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Transfers": {
+      "main": [
+        [
+          {
+            "node": "Read Call Backs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Call Backs": {
+      "main": [
+        [
+          {
+            "node": "Build Feed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

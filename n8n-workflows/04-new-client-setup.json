@@ -1,0 +1,807 @@
+{
+  "name": "Sara - New Client Setup",
+  "nodes": [
+    {
+      "id": "f6916da8-6a3b-480b-8989-4cbcf2cd242b",
+      "name": "New Sign-up",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "full_name",
+              "type": "string"
+            },
+            {
+              "name": "email",
+              "type": "string"
+            },
+            {
+              "name": "company_name",
+              "type": "string"
+            },
+            {
+              "name": "phone",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "3cf5fb9c-baeb-4ce0-8fbe-a3d580594ca2",
+      "name": "Find Existing Account",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_PORTAL_ACCOUNTS_TABLE_ID"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "condition": "eq",
+              "keyValue": "={{ String($('New Sign-up').first().json.email || '').trim().toLowerCase() }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "8346d2fc-5014-4d3f-a5e2-0081762ad02b",
+      "name": "Plan Setup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Decides whether this sign-up needs a new client set up, and builds the new Google Sheet.\n// Tab IDs match the master sheet, because Sara's call workflow finds some tabs by ID.\nconst inp = $('New Sign-up').first().json;\nconst existing = $input.all().map(function (i) { return i.json; }).filter(function (r) { return r && r.email; });\nconst email = String(inp.email || '').trim().toLowerCase();\nconst fullName = String(inp.full_name || '').trim();\nconst company = String(inp.company_name || '').trim() || fullName || 'New business';\nconst phone = String(inp.phone || '').trim();\nif (!email || existing.length) return [{ json: { skip: true, email: email, company: company } }];\n\nfunction cell(v) { return { userEnteredValue: { stringValue: String(v == null ? '' : v) } }; }\nfunction tab(id, title, index, data) {\n  return { properties: { sheetId: id, title: title, index: index, gridProperties: { frozenRowCount: 1 } },\n    data: [{ startRow: 0, startColumn: 0, rowData: data.map(function (r) { return { values: r.map(cell) }; }) }] };\n}\nconst spec = {\n  properties: { title: 'Sara - ' + company + ' (client)', timeZone: 'America/New_York' },\n  sheets: [\n    tab(101, 'Business_Info', 0, [['Field', 'Value'], ['business_name', company], ['phone_number', phone], ['hours', 'To be confirmed'],\n      ['timezone', 'America/New_York'], ['address', ''], ['services_offered', ''], ['booking_policy', ''], ['cancellation_policy', ''],\n      ['escalation_phone', phone], ['escalation_email', email], ['greeting_script', 'Thanks for calling ' + company + ', this is Sara. How can I help you today?']]),\n    tab(1057738413, 'Hours', 1, [['day', 'open', 'close'], ['Sunday', 'Closed', 'Closed'], ['Monday', '9:00', '17:00'], ['Tuesday', '9:00', '17:00'],\n      ['Wednesday', '9:00', '17:00'], ['Thursday', '9:00', '17:00'], ['Friday', '9:00', '17:00'], ['Saturday', 'Closed', 'Closed']]),\n    tab(713308780, 'Holiday', 2, [['date', 'name', 'closed_all_day', 'open', 'close']]),\n    tab(102, 'FAQs', 3, [['question', 'answer']]),\n    tab(772487488, 'Appointments', 4, [['id', 'customer_name', 'phone', 'service', 'datetime', 'status', 'notes', 'created_at', 'output', 'email']]),\n    tab(814807539, 'Tickets', 5, [['id', 'customer_name', 'phone', 'issue', 'status', 'priority', 'created_at', 'notes', 'ticket_id', 'phone_number', 'issue_description']]),\n    tab(808961940, 'Transfers', 6, [['timestamp', 'customer_name', 'caller_phone', 'department', 'reason', 'status']]),\n    tab(1404738896, 'Call Backs', 7, [['timestamp', 'customer_name', 'caller_phone', 'callback_time', 'notes', 'status']]),\n    tab(228614849, 'Call Logs', 8, [['call_id', 'caller_phone', 'duration_seconds', 'recording_url', 'timestamp', 'transcript']])\n  ]\n};\nreturn [{ json: { skip: false, email: email, full_name: fullName, first_name: fullName.split(/\\s+/)[0] || 'there', company: company, phone: phone, spec: spec } }];\n"
+      }
+    },
+    {
+      "id": "54454ae6-d35f-4ab1-b796-3eeeffdbab60",
+      "name": "New Business?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.skip }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              },
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "4d70640e-12a3-4453-a49a-4d4488427c38",
+      "name": "Add to Client Config",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2000,
+        120
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "schema": [
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "phone_number",
+              "id": "phone_number",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "client_name",
+              "id": "client_name",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "sheet_id",
+              "id": "sheet_id",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "sheet_url",
+              "id": "sheet_url",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "whatsapp_phone_number_id",
+              "id": "whatsapp_phone_number_id",
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {
+            "client_name": "={{ $('Plan Setup').first().json.company }}",
+            "phone_number": "",
+            "sheet_id": "={{ $('Create Spreadsheet').first().json.spreadsheetId }}",
+            "sheet_url": "={{ $('Create Spreadsheet').first().json.spreadsheetUrl }}",
+            "status": "setup",
+            "whatsapp_phone_number_id": ""
+          }
+        },
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_CLIENT_CONFIG_MASTER_SHEET_ID"
+        },
+        "operation": "append",
+        "options": {
+          "cellFormat": "RAW"
+        },
+        "resource": "sheet",
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Client Config Master"
+        }
+      },
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "a83689da-6c80-42a9-ae40-fe6c178faf7b",
+      "name": "Create Dashboard Login",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2220,
+        120
+      ],
+      "parameters": {
+        "columns": {
+          "mappingMode": "defineBelow",
+          "schema": [
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "email",
+              "id": "email",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "client_phone",
+              "id": "client_phone",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "business_name",
+              "id": "business_name",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "active",
+              "id": "active",
+              "required": false,
+              "type": "boolean"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "sheet_id",
+              "id": "sheet_id",
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {
+            "active": true,
+            "business_name": "={{ $('Plan Setup').first().json.company }}",
+            "client_phone": "",
+            "email": "={{ $('Plan Setup').first().json.email }}",
+            "sheet_id": "={{ $('Create Spreadsheet').first().json.spreadsheetId }}"
+          }
+        },
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_PORTAL_ACCOUNTS_TABLE_ID"
+        },
+        "operation": "insert",
+        "resource": "row"
+      }
+    },
+    {
+      "id": "88a1c0cd-51bb-4d16-a2ef-3745207b6f5b",
+      "name": "Email Welcome",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2440,
+        120
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $('Plan Setup').first().json.email }}",
+        "subject": "=Welcome to Sara: your {{ $('Plan Setup').first().json.company }} dashboard is ready",
+        "emailType": "text",
+        "message": "=Hi {{ $('Plan Setup').first().json.first_name }},\n\nThanks for signing up for Sara. Your account for {{ $('Plan Setup').first().json.company }} is ready.\n\nYOUR DASHBOARD\nhttps://voice-receptionist-puce.vercel.app/dashboard.html\nSign in with this email address ({{ $('Plan Setup').first().json.email }}). We'll email you a 6-digit code each time, no password needed. Every appointment, ticket, transfer and callback Sara handles will show up there.\n\nCHROME EXTENSION (optional)\nhttps://voice-receptionist-puce.vercel.app/extension.html\n\nWHAT WE NEED FROM YOU\nJust reply to this email with:\n1. Your opening hours, and your time zone if you're not on US Eastern time\n2. The services you offer, and how long each appointment takes\n3. Three to five questions callers often ask, with your answers\n4. Which phone number Sara should answer: your existing number (you'll forward calls to her) or a new number from us\n\nWHAT HAPPENS NEXT\nWe load your details, connect your phone line and send your $199 a month payment link. Then Sara starts answering your calls, 24/7.\n\nQuestions? Just reply to this email.\n\nMuaz\nSara, AI voice receptionist",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Sara"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "id": "e2ef0424-8277-41f2-b3d6-af87c5d15010",
+      "name": "Email Owner: Next Steps",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2660,
+        120
+      ],
+      "parameters": {
+        "emailType": "text",
+        "message": "=A new business signed up and was set up automatically.\n\nBusiness: {{ $('Plan Setup').first().json.company }}\nContact: {{ $('Plan Setup').first().json.full_name }}\nEmail: {{ $('Plan Setup').first().json.email }}\nPhone: {{ $('Plan Setup').first().json.phone || 'not given' }}\n\nDone for you:\n- Their own Google Sheet: {{ $('Create Spreadsheet').first().json.spreadsheetUrl }}\n- A new row in Client Config Master (status: setup, phone_number empty)\n- A dashboard login for their email (Sara Portal Accounts table)\n- A welcome email asking for their hours, services, FAQs and phone number\n\nTo make Sara answer their calls:\n1. When they reply, fill in the Business_Info, Hours and FAQs tabs in their sheet.\n2. Get or connect their phone number in Retell.\n3. Put that number's digits in the phone_number cell of their Client Config Master row and change status to active.\n4. Send their payment link.",
+        "operation": "send",
+        "options": {
+          "appendAttribution": false,
+          "replyTo": "={{ $('Plan Setup').first().json.email }}",
+          "senderName": "Sara setup"
+        },
+        "resource": "message",
+        "sendTo": "owner@example.com",
+        "subject": "=Set up: {{ $('Plan Setup').first().json.company }} is ready for a phone number"
+      },
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "id": "15d8a76d-a70d-466d-bd44-b828f8732627",
+      "name": "Create Spreadsheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        900,
+        200
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "create",
+        "options": {
+          "locale": "en_US"
+        },
+        "resource": "spreadsheet",
+        "sheetsUi": {
+          "sheetValues": [
+            {
+              "title": "Business_Info"
+            },
+            {
+              "title": "FAQs"
+            }
+          ]
+        },
+        "title": "=Sara - {{ $json.company }} (client)"
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "57d2aed7-ce82-4f3f-87aa-5d4fe92420dc",
+      "name": "Tab List",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// Tabs Sara's call workflow finds by ID: created with the same IDs as the master sheet.\nreturn [\n  { title: 'Hours', sheetId: 1057738413, index: 2 },\n  { title: 'Holiday', sheetId: 713308780, index: 3 },\n  { title: 'Appointments', sheetId: 772487488, index: 4 },\n  { title: 'Tickets', sheetId: 814807539, index: 5 },\n  { title: 'Transfers', sheetId: 808961940, index: 6 },\n  { title: 'Call Backs', sheetId: 1404738896, index: 7 },\n  { title: 'Call Logs', sheetId: 228614849, index: 8 }\n].map(function (t) { return { json: t }; });\n",
+        "mode": "runOnceForAllItems"
+      }
+    },
+    {
+      "id": "01be854e-0b14-4ab3-8a70-2d725fb15744",
+      "name": "Create Tabs",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1340,
+        200
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Create Spreadsheet').first().json.spreadsheetId }}"
+        },
+        "operation": "create",
+        "options": {
+          "index": "={{ $json.index }}",
+          "sheetId": "={{ $json.sheetId }}"
+        },
+        "resource": "sheet",
+        "title": "={{ $json.title }}"
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "47fdb0c5-2a10-4639-a49e-b98b289dbd4c",
+      "name": "Tab Contents",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1560,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// What goes in each tab: Business_Info and Hours get starter rows, the rest get their column headers.\nconst p = $('Plan Setup').first().json;\nfunction blank(cols) { const o = {}; cols.forEach(function (c) { o[c] = ''; }); return [o]; }\nconst info = [['business_name', p.company], ['phone_number', p.phone], ['hours', 'To be confirmed'], ['timezone', 'America/New_York'],\n  ['address', ''], ['services_offered', ''], ['booking_policy', ''], ['cancellation_policy', ''], ['escalation_phone', p.phone],\n  ['escalation_email', p.email], ['greeting_script', 'Thanks for calling ' + p.company + ', this is Sara. How can I help you today?']]\n  .map(function (r) { return { Field: r[0], Value: r[1] }; });\nconst days = [['Sunday', 'Closed', 'Closed'], ['Monday', '9:00', '17:00'], ['Tuesday', '9:00', '17:00'], ['Wednesday', '9:00', '17:00'],\n  ['Thursday', '9:00', '17:00'], ['Friday', '9:00', '17:00'], ['Saturday', 'Closed', 'Closed']]\n  .map(function (r) { return { day: r[0], open: r[1], close: r[2] }; });\nreturn [\n  { tab: 'Business_Info', rows: info },\n  { tab: 'Hours', rows: days },\n  { tab: 'Holiday', rows: blank(['date', 'name', 'closed_all_day', 'open', 'close']) },\n  { tab: 'FAQs', rows: blank(['question', 'answer']) },\n  { tab: 'Appointments', rows: blank(['id', 'customer_name', 'phone', 'service', 'datetime', 'status', 'notes', 'created_at', 'output', 'email']) },\n  { tab: 'Tickets', rows: blank(['id', 'customer_name', 'phone', 'issue', 'status', 'priority', 'created_at', 'notes', 'ticket_id', 'phone_number', 'issue_description']) },\n  { tab: 'Transfers', rows: blank(['timestamp', 'customer_name', 'caller_phone', 'department', 'reason', 'status']) },\n  { tab: 'Call Backs', rows: blank(['timestamp', 'customer_name', 'caller_phone', 'callback_time', 'notes', 'status']) },\n  { tab: 'Call Logs', rows: blank(['call_id', 'caller_phone', 'duration_seconds', 'recording_url', 'timestamp', 'transcript']) }\n].map(function (t) { return { json: t }; });\n",
+        "mode": "runOnceForAllItems"
+      }
+    },
+    {
+      "id": "7c7ac972-e390-492f-a4cc-1ca900c0e734",
+      "name": "Each Tab",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1780,
+        200
+      ],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "dd6d91a6-bcaf-4e25-96cf-40cdd75dbff0",
+      "name": "Split Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        360
+      ],
+      "parameters": {
+        "jsCode": "// One item per row for the tab being written.\nreturn ($input.first().json.rows || []).map(function (r) { return { json: r }; });\n",
+        "mode": "runOnceForAllItems"
+      }
+    },
+    {
+      "id": "e4f5cdcd-36cb-4845-a863-dd6d0a6169e9",
+      "name": "Write Rows",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2220,
+        360
+      ],
+      "parameters": {
+        "authentication": "oAuth2",
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "schema": [],
+          "value": {}
+        },
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Create Spreadsheet').first().json.spreadsheetId }}"
+        },
+        "operation": "append",
+        "options": {
+          "cellFormat": "RAW"
+        },
+        "resource": "sheet",
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Each Tab').first().json.tab }}"
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "8b1e69bd-b3de-447c-b882-c2c1626a7b4e",
+      "name": "Recent Sign-ups",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        110,
+        500
+      ],
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_CUSTOMERS_TABLE_ID"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "condition": "gte",
+              "keyName": "createdAt",
+              "keyValue": "={{ $now.minus({ hours: 24 }).toISO() }}"
+            }
+          ]
+        },
+        "matchType": "allConditions",
+        "operation": "get",
+        "resource": "row",
+        "returnAll": true
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "id": "5f8b28ad-8dd6-46cc-a097-aa1287353e3a",
+      "name": "Under Daily Cap?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "cap1",
+              "leftValue": "={{ $('Recent Sign-ups').all().filter(i => i.json && i.json.id).length <= 20 }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          }
+        },
+        "options": {}
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "c4322214-4dff-40cf-8d0c-25e7454b09db",
+      "name": "Email Owner: Cap Reached",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        380,
+        520
+      ],
+      "parameters": {
+        "emailType": "text",
+        "message": "=More than 20 sign-ups arrived in the last 24 hours, so this one was NOT set up automatically (no sheet, no welcome email). That is unusual and may be a bot.\n\nName: {{ $('New Sign-up').first().json.full_name }}\nEmail: {{ $('New Sign-up').first().json.email }}\nCompany: {{ $('New Sign-up').first().json.company_name }}\nPhone: {{ $('New Sign-up').first().json.phone }}\n\nIt is saved in the Sara Customers table. If it is real, reply to them yourself.",
+        "operation": "send",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Sara website"
+        },
+        "resource": "message",
+        "sendTo": "owner@example.com",
+        "subject": "=Sara: sign-up held for review ({{ $('New Sign-up').first().json.company_name || $('New Sign-up').first().json.email }})"
+      },
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Find Existing Account": {
+      "main": [
+        [
+          {
+            "node": "Plan Setup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plan Setup": {
+      "main": [
+        [
+          {
+            "node": "New Business?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Client Config": {
+      "main": [
+        [
+          {
+            "node": "Create Dashboard Login",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Dashboard Login": {
+      "main": [
+        [
+          {
+            "node": "Email Welcome",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Welcome": {
+      "main": [
+        [
+          {
+            "node": "Email Owner: Next Steps",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Business?": {
+      "main": [
+        [
+          {
+            "node": "Create Spreadsheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Spreadsheet": {
+      "main": [
+        [
+          {
+            "node": "Tab List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tab List": {
+      "main": [
+        [
+          {
+            "node": "Create Tabs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Tabs": {
+      "main": [
+        [
+          {
+            "node": "Tab Contents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tab Contents": {
+      "main": [
+        [
+          {
+            "node": "Each Tab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Each Tab": {
+      "main": [
+        [
+          {
+            "node": "Add to Client Config",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Rows": {
+      "main": [
+        [
+          {
+            "node": "Write Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Rows": {
+      "main": [
+        [
+          {
+            "node": "Each Tab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Sign-up": {
+      "main": [
+        [
+          {
+            "node": "Recent Sign-ups",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recent Sign-ups": {
+      "main": [
+        [
+          {
+            "node": "Under Daily Cap?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Under Daily Cap?": {
+      "main": [
+        [
+          {
+            "node": "Find Existing Account",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email Owner: Cap Reached",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
